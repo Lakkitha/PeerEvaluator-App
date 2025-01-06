@@ -59,7 +59,6 @@ The core product is an Android application developed using **React Native**, whi
 5. Run the application on your emulator:
    ```bash
    react-native run-android   # For Android
-<!--    react-native run-ios       # For iOS -->
    ```
 
 ---
