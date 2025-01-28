@@ -6,7 +6,7 @@ This project is an innovative approach to enhancing public speaking skills throu
 
 The core product is an Android application developed using **React Native**, which integrates **Natural Language Processing (NLP)** techniques to analyze speeches and deliver meaningful insights for personal development.
 
----
+--
 
 ## Features
 
