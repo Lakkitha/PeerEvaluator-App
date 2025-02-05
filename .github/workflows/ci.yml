@@ -20,10 +20,10 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: yarn install
+        run: cd app && yarn install
 
       - name: Run ESLint (Code Linting)
-        run: yarn lint
+        run: cd app && yarn lint
 
       - name: Run Jest Tests
         run: yarn test
@@ -38,3 +38,6 @@ jobs:
         with:
           name: android-apk
           path: android/app/build/outputs/apk/release/app-release.apk
+      - name: Clean Yarn Cache
+        run: yarn cache clean
+
