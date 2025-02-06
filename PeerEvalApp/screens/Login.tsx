@@ -44,7 +44,7 @@ const Login = ({navigation}: LoginProps) => {
   };
 
   const handleLogin = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {return;}
 
     setLoading(true);
     try {
