@@ -1,0 +1,19 @@
+{
+    "model_settings": {
+        "tiny": {
+            "beam_size": 5,
+            "best_of": 5,
+            "fp16": true
+        },
+        "base": {
+            "beam_size": 5,
+            "best_of": 5,
+            "fp16": true
+        }
+    },
+    "audio_settings": {
+        "sample_rate": 16000,
+        "max_duration": 600,
+        "min_duration": 1
+    }
+}
