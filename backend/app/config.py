@@ -1,5 +1,9 @@
 import os
-from firebase_admin import credentials, initialize_app, firestore, auth
+from dotenv import load_dotenv
+from firebase_admin import credentials, initialize_app
+
+# Load environment variables
+load_dotenv()
 
 # Firebase configuration
 firebase_config = {
@@ -10,9 +14,3 @@ firebase_config = {
     "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
     "client_id": os.getenv("FIREBASE_CLIENT_ID"),
 }
-
-cred = credentials.Certificate(firebase_config)
-firebase_app = initialize_app(cred)
-
-# Firestore database
-db = firestore.client()
