@@ -1,6 +1,31 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+// Changed from .kts to .gradle
+apply from: file("../node_modules/@react-native/gradle-plugin/settings.gradle")
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            // Android JSC is installed from npm
+            url("$rootDir/../node_modules/jsc-android/dist")
+        }
+        maven {
+            // All of React Native (JS, Android binaries) is installed from npm
+            url("$rootDir/../node_modules/react-native/android")
+        }
+    }
+}
+
 rootProject.name = 'PeerEvalApp'
+
+apply plugin: "com.facebook.react.rootproject"
 include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
