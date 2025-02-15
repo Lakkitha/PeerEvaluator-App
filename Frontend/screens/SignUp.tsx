@@ -42,7 +42,6 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         secureTextEntry
         onChangeText={setPassword}
         value={password}
-        
       />
       <View style={styles.buttonContainer}>
         <Button
