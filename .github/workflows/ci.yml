@@ -1,45 +1,45 @@
-name: CI/CD for React Native
+name: CI Pipeline
 
 on:
   push:
     branches:
       - main
-      - develop
   pull_request:
+    branches:
+      - "*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Install Dependencies
+      # Frontend CI
+      - name: Install Frontend dependencies
+        working-directory: Frontend
         run: npm install
-        working-directory: app  # Remove this if package.json is in root
 
-      - name: Run ESLint
+      - name: Run Frontend lint
+        working-directory: Frontend
         run: npm run lint
-        working-directory: app  # Remove if package.json is in root
 
-      - name: Run Jest Tests
-        run: npm test
+      - name: Run Frontend tests
+        working-directory: Frontend
+        run: npm run test
 
-      - name: Build Android App
-        run: cd android && ./gradlew assembleRelease
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      # Backend Functions CI
+      - name: Install Backend Functions dependencies
+        working-directory: Backend/functions
+        run: npm install
 
-      - name: Debug Repository Structure
-        run: ls -R
-
-      - name: Upload Android APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+      - name: Run Backend Functions lint
+        working-directory: Backend/functions
+        run: npm run lint
