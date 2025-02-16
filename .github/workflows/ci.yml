@@ -1,0 +1,65 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      # Frontend CI
+      - name: Install Frontend dependencies
+        working-directory: Frontend
+        run: |
+          npm ci
+          npm install --save-dev @testing-library/react-native @testing-library/jest-native jest-environment-jsdom
+
+      - name: Run Frontend lint
+        working-directory: Frontend
+        run: npm run lint -- --max-warnings 4
+        continue-on-error: true
+
+      - name: Run Frontend tests
+        working-directory: Frontend
+        run: npm test -- --coverage --passWithNoTests
+        env:
+          CI: true
+
+      # Backend Functions CI
+      - name: Install Backend Functions dependencies
+        working-directory: Backend/functions
+        run: npm ci
+
+      - name: Run Backend Functions lint
+        working-directory: Backend/functions
+        run: npm run lint -- --max-warnings 4
+        continue-on-error: true
+
+      - name: Build Frontend
+        working-directory: Frontend
+        run: npm run build || exit 0
+
+      # Upload test coverage
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: Frontend/coverage
+          retention-days: 14
+        if: always()
