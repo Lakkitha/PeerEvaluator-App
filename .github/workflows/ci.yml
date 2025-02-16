@@ -21,17 +21,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-
-      # Cache dependencies
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            Frontend/node_modules
-            Backend/functions/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache-dependency-path: '**/package-lock.json'
 
       # Frontend CI
       - name: Install Frontend dependencies
@@ -65,7 +55,7 @@ jobs:
         working-directory: Frontend
         run: npm run build || exit 0
 
-      # Upload test coverage using v4
+      # Upload test coverage
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
@@ -73,16 +63,3 @@ jobs:
           path: Frontend/coverage
           retention-days: 14
         if: always()
-
-      # Notify on failure
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.name,
-              body: '❌ CI Pipeline failed. Please check the logs for more details.'
-            })
