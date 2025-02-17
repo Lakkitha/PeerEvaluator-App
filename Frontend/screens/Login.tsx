@@ -1,7 +1,12 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, TextInput, Button, StyleSheet, Alert} from 'react-native';
-import {auth} from '../firebaseConfig';
-import {signInWithEmailAndPassword} from 'firebase/auth';
+import {auth, googleProvider} from '../firebaseConfig';
+import {
+  signInWithEmailAndPassword,
+  signInWithCredential,
+  GoogleAuthProvider,
+} from 'firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 type RootStackParamList = {
@@ -16,6 +21,12 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '637568203533-micdr3ramm47f4s299tiro7t2ntm26cv.apps.googleusercontent.com',
+    });
+  }, []);
+
   const handleLogin = async () => {
     setIsLoading(true);
     try {
@@ -25,6 +36,18 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
       Alert.alert('Error', (error as Error).message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const {idToken} = await GoogleSignin.signIn();
+      const credential = GoogleAuthProvider.credential(idToken);
+      await signInWithCredential(auth, credential);
+      Alert.alert('Success', 'Google login successful');
+    } catch (error) {
+      Alert.alert('Error', (error as Error).message);
     }
   };
 
@@ -48,6 +71,9 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
       />
       <View style={styles.buttonContainer}>
         <Button title="Login" onPress={handleLogin} disabled={isLoading} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Sign in with Google" onPress={handleGoogleLogin} />
       </View>
       <Button
         title="Don't have an account? Sign Up"
