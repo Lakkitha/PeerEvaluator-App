@@ -18,3 +18,5 @@ const AuthStack = () => {
     </Stack.Navigator>
   );
 };
+
+export default AuthStack; 

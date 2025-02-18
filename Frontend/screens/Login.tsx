@@ -23,7 +23,8 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '637568203533-micdr3ramm47f4s299tiro7t2ntm26cv.apps.googleusercontent.com',
+      webClientId:
+        '637568203533-micdr3ramm47f4s299tiro7t2ntm26cv.apps.googleusercontent.com',
     });
   }, []);
 
@@ -42,8 +43,19 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
   const handleGoogleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const {idToken} = await GoogleSignin.signIn();
-      const credential = GoogleAuthProvider.credential(idToken);
+      const userInfo = await GoogleSignin.signIn();
+
+      // Get tokens
+      const {accessToken} = await GoogleSignin.getTokens();
+      if (!userInfo.idToken) {
+        throw new Error('No ID token present in Google Sign-in response');
+      }
+
+      // Create credential and sign in
+      const credential = GoogleAuthProvider.credential(
+        userInfo.idToken,
+        accessToken,
+      );
       await signInWithCredential(auth, credential);
       Alert.alert('Success', 'Google login successful');
     } catch (error) {
