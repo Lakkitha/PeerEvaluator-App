@@ -1,12 +1,7 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {View, Text, TextInput, Button, StyleSheet, Alert} from 'react-native';
-import {auth, googleProvider} from '../firebaseConfig';
-import {
-  signInWithEmailAndPassword,
-  signInWithCredential,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {auth} from '../firebaseConfig';
+import {signInWithEmailAndPassword} from 'firebase/auth';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 type RootStackParamList = {
@@ -21,13 +16,6 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-        '637568203533-micdr3ramm47f4s299tiro7t2ntm26cv.apps.googleusercontent.com',
-    });
-  }, []);
-
   const handleLogin = async () => {
     setIsLoading(true);
     try {
@@ -37,29 +25,6 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
       Alert.alert('Error', (error as Error).message);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-
-      // Get tokens
-      const {accessToken} = await GoogleSignin.getTokens();
-      if (!userInfo.idToken) {
-        throw new Error('No ID token present in Google Sign-in response');
-      }
-
-      // Create credential and sign in
-      const credential = GoogleAuthProvider.credential(
-        userInfo.idToken,
-        accessToken,
-      );
-      await signInWithCredential(auth, credential);
-      Alert.alert('Success', 'Google login successful');
-    } catch (error) {
-      Alert.alert('Error', (error as Error).message);
     }
   };
 
@@ -83,9 +48,6 @@ const LoginScreen = ({navigation}: LoginScreenProps) => {
       />
       <View style={styles.buttonContainer}>
         <Button title="Login" onPress={handleLogin} disabled={isLoading} />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button title="Sign in with Google" onPress={handleGoogleLogin} />
       </View>
       <Button
         title="Don't have an account? Sign Up"
