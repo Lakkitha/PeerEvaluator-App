@@ -10,9 +10,15 @@ type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -43,11 +49,18 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         onChangeText={setPassword}
         value={password}
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        secureTextEntry
+        onChangeText={setConfirmPassword}
+        value={confirmPassword}
+      />
       <View style={styles.buttonContainer}>
         <Button
           title={isLoading ? 'Creating account...' : 'Sign Up'}
           onPress={handleSignup}
-          disabled={isLoading}
+          disabled={isLoading || !email || !password || !confirmPassword}
         />
       </View>
       <Button
