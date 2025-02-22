@@ -54,6 +54,12 @@ react {
     autolinkLibrariesWithApp()
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'com.android.support:support-v4:28.0.0'
+    }
+}
+
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
