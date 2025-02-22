@@ -12,8 +12,36 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  const validatePassword = (pass: string) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(pass);
+    const hasNumber = /\d/.test(pass);
+
+    if (pass.length < minLength) {
+      setPasswordError('Password must be at least 8 characters long');
+      return false;
+    }
+    if (!hasUpperCase) {
+      setPasswordError('Password must contain at least one uppercase letter');
+      return false;
+    }
+    if (!hasNumber) {
+      setPasswordError('Password must contain at least one number');
+      return false;
+    }
+
+    setPasswordError('');
+    return true;
+  };
 
   const handleSignup = async () => {
+    if (!validatePassword(password)) {
+      Alert.alert('Error', passwordError);
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -43,12 +71,18 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         value={email}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, passwordError ? styles.inputError : null]}
         placeholder="Password"
         secureTextEntry
-        onChangeText={setPassword}
+        onChangeText={text => {
+          setPassword(text);
+          validatePassword(text);
+        }}
         value={password}
       />
+      {passwordError ? (
+        <Text style={styles.errorText}>{passwordError}</Text>
+      ) : null}
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
@@ -60,7 +94,13 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
         <Button
           title={isLoading ? 'Creating account...' : 'Sign Up'}
           onPress={handleSignup}
-          disabled={isLoading || !email || !password || !confirmPassword}
+          disabled={
+            isLoading ||
+            !email ||
+            !password ||
+            !confirmPassword ||
+            !!passwordError
+          }
         />
       </View>
       <Button
@@ -87,6 +127,14 @@ const styles = StyleSheet.create({
     borderColor: '#333',
     borderRadius: 4,
     padding: 12,
+    marginBottom: 12,
+  },
+  inputError: {
+    borderColor: 'red',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
     marginBottom: 12,
   },
   buttonContainer: {
