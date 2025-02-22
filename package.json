@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.21.0",
     "glob": "^11.0.1",
     "inflight": "^1.0.6",
     "lru-cache": "^11.0.2",
