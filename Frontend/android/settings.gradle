@@ -1,6 +1,26 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'Frontend'
+
+// Comment out the problematic line
+// apply from: file("../node_modules/@react-native/gradle-plugin/settings.gradle")
+
+// Just include the app project
 include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://www.jitpack.io" }
+        maven { url '../node_modules/react-native/android' }
+    }
+}
+
+println "Using simplified settings without external dependencies"
