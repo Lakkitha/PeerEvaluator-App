@@ -3,3 +3,4 @@
 firebase_key.json
 *.key
 *.pem
+node_modules
