@@ -1,0 +1,15 @@
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/CMakeFiles/appmodules.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/rnasyncstorage_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/rnasyncstorage_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/RNGoogleSignInCGen_autolinked_build/CMakeFiles/react_codegen_RNGoogleSignInCGen.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/RNGoogleSignInCGen_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/RNGoogleSignInCGen_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/safeareacontext_autolinked_build/CMakeFiles/react_codegen_safeareacontext.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/safeareacontext_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/safeareacontext_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/rnscreens_autolinked_build/CMakeFiles/react_codegen_rnscreens.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/rnscreens_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/armeabi-v7a/rnscreens_autolinked_build/CMakeFiles/rebuild_cache.dir

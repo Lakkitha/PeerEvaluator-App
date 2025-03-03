@@ -1,0 +1,15 @@
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/CMakeFiles/appmodules.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/rnasyncstorage_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/rnasyncstorage_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/RNGoogleSignInCGen_autolinked_build/CMakeFiles/react_codegen_RNGoogleSignInCGen.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/RNGoogleSignInCGen_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/RNGoogleSignInCGen_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/safeareacontext_autolinked_build/CMakeFiles/react_codegen_safeareacontext.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/safeareacontext_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/safeareacontext_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/rnscreens_autolinked_build/CMakeFiles/react_codegen_rnscreens.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/rnscreens_autolinked_build/CMakeFiles/edit_cache.dir
+D:/lakkitha/Github/PeerEvaluator-App/Frontend/android/app/.cxx/Debug/iv4x5n61/x86_64/rnscreens_autolinked_build/CMakeFiles/rebuild_cache.dir
