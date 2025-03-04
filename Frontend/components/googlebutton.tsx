@@ -1,28 +1,47 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View, Image } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Image,
+  ViewStyle,
+  View,
+} from 'react-native';
 
 interface GoogleButtonProps {
   onPress: () => void;
   title?: string;
-  style?: object;
+  style?: ViewStyle;
 }
 
 const GoogleButton: React.FC<GoogleButtonProps> = ({
   onPress,
-  title = "Sign in with Google",
-  style
+  title = 'Sign in with Google',
+  style,
 }) => {
-  return (
-    <TouchableOpacity
-      style={[styles.button, style]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.contentContainer}>
+  // Using a try-catch block to handle potential missing assets
+  const renderGoogleIcon = () => {
+    try {
+      return (
         <Image
           source={require('../assets/google-icon.png')}
           style={styles.icon}
         />
+      );
+    } catch (error) {
+      console.warn('Google icon asset not found:', error);
+      // Return a text "G" as fallback
+      return <Text style={styles.iconFallback}>G</Text>;
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      style={[styles.button, style]}
+      onPress={onPress}
+      activeOpacity={0.7}>
+      <View style={styles.contentContainer}>
+        {renderGoogleIcon()}
         <Text style={styles.text}>{title}</Text>
       </View>
     </TouchableOpacity>
@@ -31,18 +50,20 @@ const GoogleButton: React.FC<GoogleButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#ffffff',
-    borderRadius: 4,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.2,
-    shadowRadius: 1.5,
+    shadowRadius: 1,
+    elevation: 1,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -50,16 +71,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    width: 18,
-    height: 18,
+    width: 24,
+    height: 24,
     marginRight: 12,
   },
+  iconFallback: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4285F4', // Google blue color
+  },
   text: {
-    color: 'rgba(0, 0, 0, 0.87)',
-    fontSize: 14,
+    color: '#757575',
+    fontSize: 16,
     fontWeight: '500',
     fontFamily: 'Roboto-Medium', // You may need to ensure this font is available/linked
-  }
+  },
 });
 
 export default GoogleButton;

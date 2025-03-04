@@ -4,6 +4,7 @@ import {auth} from '../firebaseConfig';
 import {createUserWithEmailAndPassword} from 'firebase/auth';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/AppNavigator';
+import GoogleButton from '../components/googlebutton';
 
 type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
@@ -22,6 +23,19 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
       Alert.alert('Error', (error as Error).message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    // This is a placeholder for Google signup functionality
+    // You would implement Firebase Google Auth here
+    try {
+      Alert.alert(
+        'Info',
+        'Google signup functionality will be implemented soon',
+      );
+    } catch (error) {
+      Alert.alert('Error', (error as Error).message);
     }
   };
 
@@ -50,6 +64,11 @@ const SignUpScreen = ({navigation}: SignUpScreenProps) => {
           disabled={isLoading}
         />
       </View>
+      <GoogleButton
+        onPress={handleGoogleSignup}
+        title="Sign up with Google"
+        style={styles.googleButton}
+      />
       <Button
         title="Already have an account? Login"
         onPress={() => navigation.navigate('Login')}
@@ -78,6 +97,9 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginVertical: 6,
+  },
+  googleButton: {
+    marginVertical: 12,
   },
 });
 
