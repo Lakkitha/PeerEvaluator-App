@@ -3,9 +3,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // Page Imports (will create these later)
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 // Components
 import Layout from "./components/Layout";
-// import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
@@ -13,16 +14,17 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Login />} />
 
-          {/* Protected User Routes
+          {/* Protected User Routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/evaluate" element={<SpeechEvaluation />} />
+            <Route path="/login" element={<Home />} />
+            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+            {/* <Route path="/evaluate" element={<SpeechEvaluation />} />
             <Route path="/progress" element={<ProgressTracking />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route> */}
+            <Route path="/settings" element={<Settings />} /> */}
+          </Route>
 
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
