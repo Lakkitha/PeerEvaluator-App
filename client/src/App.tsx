@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 // Components
 import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
@@ -15,6 +16,7 @@ function App() {
         <Route element={<Layout />}>
           {/* Public Routes */}
           <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
 
           {/* Protected User Routes */}
           <Route element={<PrivateRoute />}>
