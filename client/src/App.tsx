@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Page Imports (will create these later)
+// Page Imports
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import SpeechEvaluation from "./pages/SpeechEvaluation";
 // Components
 import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
@@ -20,10 +21,10 @@ function App() {
 
           {/* Protected User Routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="/login" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/evaluate" element={<SpeechEvaluation />} />
             {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-            {/* <Route path="/evaluate" element={<SpeechEvaluation />} />
-            <Route path="/progress" element={<ProgressTracking />} />
+            {/* <Route path="/progress" element={<ProgressTracking />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} /> */}
           </Route>
