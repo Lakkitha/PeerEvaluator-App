@@ -53,7 +53,7 @@ const SignUp = () => {
       });
 
       // Redirect to home
-      navigate("/login");
+      navigate("/home");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to create account");
