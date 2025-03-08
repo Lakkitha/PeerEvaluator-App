@@ -17,7 +17,7 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/login"); // Navigate to Home component (which is mapped to /login in your routes)
+      navigate("/home"); // Fix: Changed from "/login" to "/home"
     } catch (err: unknown) {
       // Type guard to check if the error is a Firebase AuthError
       if (err instanceof Error) {
