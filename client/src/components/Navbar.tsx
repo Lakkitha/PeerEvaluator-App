@@ -1,10 +1,15 @@
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
-const Navbar = () => {
+const AppNavbar = () => {
   const [user, setUser] = useState(auth.currentUser);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -17,50 +22,47 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      navigate('/');
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-blue-600 text-white shadow-lg z-10">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <Link to={user ? "/home" : "/"} className="text-xl font-bold">
-            PeerEvaluator
-          </Link>
-          <div className="flex space-x-4">
-            {user ? (
+    <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark" fixed="top" className="shadow-lg">
+      <Container>
+        <Navbar.Brand as={Link} to={user ? "/home" : "/"}>PeerEvaluator</Navbar.Brand>
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="me-auto">
+            {user && (
               <>
-                <Link to="/home" className="hover:text-blue-200">
-                  Home
-                </Link>
-                <Link to="/evaluate" className="hover:text-blue-200">
-                  Speech Evaluation
-                </Link>
-                {/* Additional protected links */}
-                <button
-                  onClick={handleLogout}
-                  className="hover:text-blue-200"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/" className="hover:text-blue-200">
-                  Login
-                </Link>
-                <Link to="/signup" className="hover:text-blue-200">
-                  Sign Up
-                </Link>
+                <Nav.Link as={Link} to="/home">Home</Nav.Link>
+                <Nav.Link as={Link} to="/evaluate">Speech Evaluation</Nav.Link>
+                <NavDropdown title="More" id="collapsible-nav-dropdown">
+                  <NavDropdown.Item as={Link} to="/dashboard">Dashboard</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/progress">Progress Tracking</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/settings">Settings</NavDropdown.Item>
+                </NavDropdown>
               </>
             )}
-          </div>
-        </div>
-      </div>
-    </nav>
+          </Nav>
+          <Nav>
+            {user ? (
+              <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+            ) : (
+              <>
+                <Nav.Link as={Link} to="/">Login</Nav.Link>
+                <Nav.Link as={Link} to="/signup">Sign Up</Nav.Link>
+              </>
+            )}
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 };
 
-export default Navbar;
+export default AppNavbar;
