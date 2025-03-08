@@ -1,12 +1,14 @@
-import AudioRecorder from '../components/AudioRecorder';
-import { useState } from 'react';
-import { evaluateSpeech } from '../services/openai';
+import AudioRecorder from "../components/AudioRecorder";
+import ApiKeyTester from "../components/ApiKeyTester";
+import { useState } from "react";
+import { evaluateSpeech } from "../services/openai";
 
 const SpeechEvaluation = () => {
-  const [evaluation, setEvaluation] = useState<string>('');
-  const [transcript, setTranscript] = useState<string>('');
+  const [evaluation, setEvaluation] = useState<string>("");
+  const [transcript, setTranscript] = useState<string>("");
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
+  const [showApiTester, setShowApiTester] = useState<boolean>(false);
 
   // Handle the transcript update from the AudioRecorder
   const handleTranscriptUpdate = (text: string) => {
@@ -15,20 +17,20 @@ const SpeechEvaluation = () => {
 
   const handleEvaluate = async () => {
     if (!transcript) {
-      setError('Please record a speech first');
+      setError("Please record a speech first");
       return;
     }
 
     try {
       setIsEvaluating(true);
-      setError('');
+      setError("");
       const result = await evaluateSpeech(transcript);
       setEvaluation(result);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Failed to evaluate speech');
+        setError("Failed to evaluate speech");
       }
     } finally {
       setIsEvaluating(false);
@@ -39,6 +41,18 @@ const SpeechEvaluation = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Speech Evaluation</h1>
 
+      {/* Add a toggle button for API tester */}
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={() => setShowApiTester(!showApiTester)}
+          className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+        >
+          {showApiTester ? "Hide API Tester" : "Show API Tester"}
+        </button>
+      </div>
+
+      {showApiTester && <ApiKeyTester />}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <AudioRecorder onTranscriptUpdate={handleTranscriptUpdate} />
@@ -48,10 +62,12 @@ const SpeechEvaluation = () => {
               onClick={handleEvaluate}
               disabled={isEvaluating || !transcript}
               className={`px-6 py-3 rounded bg-green-600 text-white font-medium hover:bg-green-700 focus:outline-none ${
-                isEvaluating || !transcript ? 'opacity-50 cursor-not-allowed' : ''
+                isEvaluating || !transcript
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
             >
-              {isEvaluating ? 'Evaluating...' : 'Evaluate Speech'}
+              {isEvaluating ? "Evaluating..." : "Evaluate Speech"}
             </button>
           </div>
 

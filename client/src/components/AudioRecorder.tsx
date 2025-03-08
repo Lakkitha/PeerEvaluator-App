@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { transcribeAudio } from '../services/openai';
+import { useState, useRef, useEffect } from "react";
+import { transcribeAudio, testApiKey } from "../services/openai";
 
 interface AudioRecorderProps {
   onTranscriptUpdate?: (transcript: string) => void;
@@ -8,23 +8,56 @@ interface AudioRecorderProps {
 const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [apiKeyStatus, setApiKeyStatus] = useState<{
+    valid: boolean;
+    message: string;
+  } | null>(null);
+  const [localTranscript, setLocalTranscript] = useState<string>("");  // New state for local transcript
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
+  // Check API key when component mounts
+  useEffect(() => {
+    const checkApiKey = async () => {
+      try {
+        const result = await testApiKey();
+        if (!result.valid) {
+          setError(`API Key issue: ${result.message}`);
+        }
+        setApiKeyStatus(result);
+      } catch (err) {
+        setError(`Failed to verify API key: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    };
+
+    checkApiKey();
+  }, []);
+
   const startRecording = async () => {
     try {
-      setError('');
+      setError("");
       setAudioUrl(null); // Clear previous recording
+      setLocalTranscript(""); // Clear previous transcript
       if (onTranscriptUpdate) {
-        onTranscriptUpdate(''); // Clear transcript in parent component
+        onTranscriptUpdate(""); // Clear transcript in parent component
       }
       audioChunksRef.current = [];
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      // Request audio with specific constraints for better quality
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+
+      // Use specific mime type that OpenAI supports well
+      const options = { mimeType: "audio/webm" };
+      const mediaRecorder = new MediaRecorder(stream, options);
 
       mediaRecorderRef.current = mediaRecorder;
 
@@ -35,7 +68,9 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/webm",
+        });
 
         // Create audio URL for playback
         const url = URL.createObjectURL(audioBlob);
@@ -45,6 +80,9 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
           setIsProcessing(true);
           const text = await transcribeAudio(audioBlob);
 
+          // Store transcript locally
+          setLocalTranscript(text);
+
           // Update the parent component with the transcript
           if (onTranscriptUpdate) {
             onTranscriptUpdate(text);
@@ -53,14 +91,14 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
           if (err instanceof Error) {
             setError(err.message);
           } else {
-            setError('An unknown error occurred');
+            setError("An unknown error occurred");
           }
         } finally {
           setIsProcessing(false);
         }
 
         // Stop all audio tracks
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
@@ -69,7 +107,7 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Could not access microphone');
+        setError("Could not access microphone");
       }
     }
   };
@@ -91,17 +129,28 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
         </div>
       )}
 
+      {apiKeyStatus && !apiKeyStatus.valid && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+          <p className="font-bold">API Key Warning</p>
+          <p>{apiKeyStatus.message}</p>
+        </div>
+      )}
+
       <div className="flex justify-center mb-6">
         <button
           onClick={isRecording ? stopRecording : startRecording}
           className={`px-6 py-3 rounded-full text-white font-medium text-lg focus:outline-none ${
             isRecording
-              ? 'bg-red-600 hover:bg-red-700 animate-pulse'
-              : 'bg-blue-600 hover:bg-blue-700'
+              ? "bg-red-600 hover:bg-red-700 animate-pulse"
+              : "bg-blue-600 hover:bg-blue-700"
           }`}
           disabled={isProcessing}
         >
-          {isProcessing ? 'Processing...' : isRecording ? 'Stop Recording' : 'Start Recording'}
+          {isProcessing
+            ? "Processing..."
+            : isRecording
+            ? "Stop Recording"
+            : "Start Recording"}
         </button>
       </div>
 
@@ -117,6 +166,23 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
           <audio controls src={audioUrl} className="w-full">
             Your browser does not support the audio element.
           </audio>
+        </div>
+      )}
+
+      {/* New transcript display section */}
+      {localTranscript && (
+        <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
+          <h3 className="text-xl font-semibold mb-2">Transcript:</h3>
+          <div className="max-h-60 overflow-y-auto">
+            <p className="whitespace-pre-wrap text-gray-700">{localTranscript}</p>
+          </div>
+        </div>
+      )}
+
+      {isProcessing && (
+        <div className="mt-4 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-2 text-blue-600">Transcribing your speech...</p>
         </div>
       )}
     </div>

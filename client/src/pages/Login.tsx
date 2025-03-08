@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { auth } from "../firebase";
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,10 +18,16 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Set the appropriate persistence based on the "Remember me" checkbox
+      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+
+      // First set persistence, then sign in
+      await setPersistence(auth, persistenceType);
+
+      // Now sign in
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/login"); // Navigate to Home component (which is mapped to /login in your routes)
+      navigate("/home");
     } catch (err: unknown) {
-      // Type guard to check if the error is a Firebase AuthError
       if (err instanceof Error) {
         setError(err.message || "Failed to log in");
       } else {
@@ -87,6 +95,8 @@ const Login = () => {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label
