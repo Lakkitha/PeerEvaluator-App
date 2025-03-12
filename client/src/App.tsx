@@ -16,12 +16,15 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           {/* Public Routes */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
 
           {/* Protected User Routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/evaluate" element={<SpeechEvaluation />} />
             {/* <Route path="/dashboard" element={<Dashboard />} /> */}
             {/* <Route path="/progress" element={<ProgressTracking />} />

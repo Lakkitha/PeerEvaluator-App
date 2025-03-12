@@ -194,7 +194,7 @@ const Navbar = () => {
             /* Login/Signup buttons when not logged in */
             <div className="flex space-x-2">
               <Link
-                to="/"
+                to="/login"
                 className="py-2 px-3 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded"
               >
                 Login
