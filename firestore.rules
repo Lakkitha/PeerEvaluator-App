@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User document rules
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isClubAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (request.auth.uid == userId || isClubAdmin());
+      allow delete: if false;  // Prevent user deletion for now
+    }
+
+    // Club rules
+    match /clubs/{clubId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (isClubAdminForClub(clubId) || isWebAdmin());
+    }
+
+    // Club admin rules
+    match /clubAdmins/{adminId} {
+      allow read: if request.auth != null && (request.auth.uid == adminId || isWebAdmin());
+      allow write: if request.auth != null && isWebAdmin();
+    }
+
+    // Main web admin rules
+    match /mainWebAdmins/{adminId} {
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      allow write: if false;  // Only allow updates through Firebase console or backend
+    }
+
+    // Evaluations rules
+    match /evaluations/{evalId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        isClubAdminForClub(resource.data.clubID)
+      );
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update: if false;  // Evaluations should be immutable
+      allow delete: if false;  // Prevent deletion
+    }
+
+    // Shared data rules
+    match /sharedData/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (
+        request.auth.uid == userId ||
+        isClubAdmin() ||
+        isWebAdmin()
+      );
+    }
+
+    // Helper functions
+    function isClubAdmin() {
+      return exists(/databases/$(database)/documents/clubAdmins/$(request.auth.uid));
+    }
+
+    function isClubAdminForClub(clubId) {
+      return exists(/databases/$(database)/documents/clubAdmins/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/clubAdmins/$(request.auth.uid)).data.clubID == clubId;
+    }
+
+    function isWebAdmin() {
+      return exists(/databases/$(database)/documents/mainWebAdmins/$(request.auth.uid));
+    }
+  }
+}

@@ -1,17 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 
 const SignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [selectedClub, setSelectedClub] = useState("");
+  const [clubs, setClubs] = useState<{ id: string; name: string }[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch clubs on component mount
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const clubsCollection = collection(db, "clubs");
+        const clubSnapshot = await getDocs(clubsCollection);
+        const clubsList = clubSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().clubName,
+        }));
+        setClubs(clubsList);
+      } catch (error) {
+        console.error("Error fetching clubs:", error);
+      }
+    };
+
+    fetchClubs();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +46,11 @@ const SignUp = () => {
     // Validate password strength
     if (password.length < 6) {
       return setError("Password should be at least 6 characters");
+    }
+
+    // Validate club selection
+    if (!selectedClub) {
+      return setError("Please select a club");
     }
 
     setLoading(true);
@@ -44,12 +70,26 @@ const SignUp = () => {
         });
       }
 
+      const now = new Date().toISOString();
+
       // Create a user document in Firestore
       await setDoc(doc(db, "users", userCredential.user.uid), {
-        name,
+        username: name,
         email,
-        createdAt: new Date().toISOString(),
-        role: "user",
+        clubID: selectedClub,
+        userLevel: "Beginner",
+        userPicture: null,
+        isVerified: false,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      // Create entry in shared data
+      await setDoc(doc(db, "sharedData", userCredential.user.uid), {
+        userID: userCredential.user.uid,
+        username: name,
+        clubID: selectedClub,
+        userLevel: "Beginner",
       });
 
       // Redirect to home
@@ -114,6 +154,29 @@ const SignUp = () => {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               required
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="club"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Select Club
+            </label>
+            <select
+              id="club"
+              value={selectedClub}
+              onChange={(e) => setSelectedClub(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required
+            >
+              <option value="">Select a club</option>
+              {clubs.map((club) => (
+                <option key={club.id} value={club.id}>
+                  {club.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

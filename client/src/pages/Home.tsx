@@ -8,9 +8,7 @@ const Home = () => {
   };
 
   const goToProgressTracking = () => {
-    // Uncomment when the route is available
-    // navigate("/progress");
-    alert("Progress tracking coming soon!");
+    navigate("/progress");
   };
 
   return (
