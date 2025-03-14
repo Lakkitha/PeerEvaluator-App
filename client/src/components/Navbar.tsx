@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import ThemeToggle from "../ThemeToggle";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -32,7 +33,7 @@ const Navbar = () => {
     try {
       await signOut(auth);
       setIsUserDropdownOpen(false);
-      navigate('/');
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -70,12 +71,22 @@ const Navbar = () => {
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900 fixed w-full z-20 shadow-md">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <Link to="/" className="flex items-center space-x-3 rtl:space-x-reverse">
-          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">PeerEvaluator</span>
+        <Link
+          to="/"
+          className="flex items-center space-x-3 rtl:space-x-reverse"
+        >
+          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+            PeerEvaluator
+          </span>
         </Link>
 
         {/* Center the navigation items on desktop */}
-        <div className={`items-center justify-center ${isMobileMenuOpen ? 'block' : 'hidden'} w-full md:flex md:w-auto md:order-1`} id="navbar-user">
+        <div
+          className={`items-center justify-center ${
+            isMobileMenuOpen ? "block" : "hidden"
+          } w-full md:flex md:w-auto md:order-1`}
+          id="navbar-user"
+        >
           {user && (
             <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
               <li>
@@ -140,7 +151,9 @@ const Navbar = () => {
               {/* User dropdown menu - positioned relative to the button */}
               <div
                 ref={dropdownRef}
-                className={`z-50 ${isUserDropdownOpen ? 'block' : 'hidden'} absolute right-0 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600`}
+                className={`z-50 ${
+                  isUserDropdownOpen ? "block" : "hidden"
+                } absolute right-0 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600`}
                 id="user-dropdown"
               >
                 <div className="px-4 py-3">
@@ -195,18 +208,20 @@ const Navbar = () => {
             <div className="flex space-x-2">
               <Link
                 to="/login"
-                className="py-2 px-3 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded"
+                className="py-2 px-3 text-sm text-gray-800 bg-gray-200 hover:bg-gray-300 rounded dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="py-2 px-3 text-sm text-gray-800 bg-gray-200 hover:bg-gray-300 rounded dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600"
+                className="py-2 px-3 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded"
               >
-                Sign Up
+                Get Started
               </Link>
             </div>
           )}
+
+          <ThemeToggle />
 
           <button
             type="button"
@@ -216,8 +231,20 @@ const Navbar = () => {
             onClick={toggleMobileMenu}
           >
             <span className="sr-only">Open main menu</span>
-            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15"/>
+            <svg
+              className="w-5 h-5"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 17 14"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M1 1h15M1 7h15M1 13h15"
+              />
             </svg>
           </button>
         </div>
