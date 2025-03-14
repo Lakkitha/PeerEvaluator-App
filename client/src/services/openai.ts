@@ -152,7 +152,7 @@ export async function evaluateSpeech(transcription: string): Promise<string> {
         {
           role: "system",
           content:
-            "You are a professional speech coach. Analyze the following speech transcript and provide constructive feedback on: clarity, coherence, delivery, vocabulary, and overall impact. Score each category from 1-10 and provide specific suggestions for improvement.",
+            "You are a professional speech coach. Analyze the following speech transcript and provide constructive feedback on: grammer, fluency, coherence, delivery, Engagement levels, and overall impact. Score each category from 1-10 and provide specific suggestions for improvement.",
         },
         {
           role: "user",
