@@ -4,7 +4,11 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 
-const SignUp = () => {
+interface SignUpProps {
+  isAdminSignup?: boolean;
+}
+
+const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -105,11 +109,15 @@ const SignUp = () => {
     }
   };
 
+  const pageTitle = isAdminSignup
+    ? "Sign Up as Club Coordinator"
+    : "Create an Account";
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          Create an Account
+          {pageTitle}
         </h1>
 
         {error && (
@@ -246,7 +254,7 @@ const SignUp = () => {
           <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link
-              to="/"
+              to={isAdminSignup ? "/admin/login" : "/login"}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Log in here

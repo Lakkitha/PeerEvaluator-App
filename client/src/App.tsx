@@ -8,14 +8,15 @@ import SignUp from "./pages/SignUp";
 import SpeechEvaluation from "./pages/SpeechEvaluation";
 import ProgressTracker from "./pages/ProgressTracker";
 import ClubAdminDashboard from "./pages/ClubAdminDashboard";
-import WebAdminDashboard from "./pages/WebAdminDashboard"; // Import the new component
-import DbInitializer from "./pages/DbInitializer"; // Import the new component
+import WebAdminDashboard from "./pages/WebAdminDashboard";
+import DbInitializer from "./pages/DbInitializer";
 
 // Components
 import Layout from "./components/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
-import WebAdminRoute from "./components/WebAdminRoute"; // We'll create this
+import WebAdminRoute from "./components/WebAdminRoute";
+import RoleSelector from "./components/RoleSelector";
 
 function App() {
   return (
@@ -24,10 +25,21 @@ function App() {
         <Route element={<Layout />}>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+
+          {/* Role Selection Routes */}
+          <Route path="/role-select/login" element={<RoleSelector mode="login" />} />
+          <Route path="/role-select/signup" element={<RoleSelector mode="signup" />} />
+
+          {/* Regular Login/Signup Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/init" element={<DbInitializer />} />{" "}
-          {/* Add this route for development */}
+
+          {/* Admin Login/Signup Routes - we'll need to create these pages */}
+          <Route path="/admin/login" element={<Login isAdminLogin={true} />} />
+          <Route path="/admin/signup" element={<SignUp isAdminSignup={true} />} />
+
+          <Route path="/init" element={<DbInitializer />} />
+
           {/* Protected User Routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/home" element={<Home />} />
@@ -36,14 +48,17 @@ function App() {
             {/* <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} /> */}
           </Route>
+
           {/* Club Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin/dashboard" element={<ClubAdminDashboard />} />
           </Route>
+
           {/* Web Admin Routes */}
           <Route element={<WebAdminRoute />}>
             <Route path="/webadmin/dashboard" element={<WebAdminDashboard />} />
           </Route>
+
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
         </Route>

@@ -1,10 +1,18 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import {
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { auth } from "../firebase";
 
-const Login = () => {
+interface LoginProps {
+  isAdminLogin?: boolean;
+}
+
+const Login = ({ isAdminLogin = false }: LoginProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,7 +27,9 @@ const Login = () => {
 
     try {
       // Set the appropriate persistence based on the "Remember me" checkbox
-      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      const persistenceType = rememberMe
+        ? browserLocalPersistence
+        : browserSessionPersistence;
 
       // First set persistence, then sign in
       await setPersistence(auth, persistenceType);
@@ -38,11 +48,15 @@ const Login = () => {
     }
   };
 
+  const pageTitle = isAdminLogin
+    ? "Log In as Club Coordinator"
+    : "Log In to PeerEvaluator";
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          Log In to PeerEvaluator
+          {pageTitle}
         </h1>
 
         {error && (
@@ -134,7 +148,7 @@ const Login = () => {
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <Link
-              to="/signup"
+              to={isAdminLogin ? "/admin/signup" : "/signup"}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign up here
