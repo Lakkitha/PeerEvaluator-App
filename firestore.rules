@@ -1,65 +1,89 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User document rules
-    match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isClubAdmin());
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && (request.auth.uid == userId || isClubAdmin());
-      allow delete: if false;  // Prevent user deletion for now
-    }
-
-    // Club rules
-    match /clubs/{clubId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && (isClubAdminForClub(clubId) || isWebAdmin());
-    }
-
-    // Club admin rules
-    match /clubAdmins/{adminId} {
-      allow read: if request.auth != null && (request.auth.uid == adminId || isWebAdmin());
-      allow write: if request.auth != null && isWebAdmin();
-    }
-
-    // Main web admin rules
-    match /mainWebAdmins/{adminId} {
-      allow read: if request.auth != null && request.auth.uid == adminId;
-      allow write: if false;  // Only allow updates through Firebase console or backend
-    }
-
-    // Evaluations rules
-    match /evaluations/{evalId} {
-      allow read: if request.auth != null && (
-        request.auth.uid == resource.data.userId ||
-        isClubAdminForClub(resource.data.clubID)
-      );
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow update: if false;  // Evaluations should be immutable
-      allow delete: if false;  // Prevent deletion
-    }
-
-    // Shared data rules
-    match /sharedData/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && (
-        request.auth.uid == userId ||
-        isClubAdmin() ||
-        isWebAdmin()
-      );
-    }
-
-    // Helper functions
-    function isClubAdmin() {
-      return exists(/databases/$(database)/documents/clubAdmins/$(request.auth.uid));
-    }
-
-    function isClubAdminForClub(clubId) {
-      return exists(/databases/$(database)/documents/clubAdmins/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/clubAdmins/$(request.auth.uid)).data.clubID == clubId;
+    // Helper functions for role checks
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     function isWebAdmin() {
-      return exists(/databases/$(database)/documents/mainWebAdmins/$(request.auth.uid));
+      return isSignedIn() && exists(/databases/$(database)/documents/Web_Admin/$(request.auth.uid));
+    }
+
+    function isClubAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/Club_Admins/$(request.auth.uid));
+    }
+
+    function isClubAdminForClub(clubId) {
+      return isClubAdmin() &&
+        get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID == clubId;
+    }
+
+    function isUser() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // User data access rules
+    match /users/{userId} {
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isSignedIn() && (request.auth.uid == userId || isClubAdmin() || isWebAdmin());
+      allow update: if isSignedIn() && (
+        request.auth.uid == userId ||
+        isClubAdminForClub(resource.data.clubID) ||
+        isWebAdmin()
+      );
+      allow delete: if isWebAdmin();
+    }
+
+    // Club data access rules
+    match /clubs/{clubId} {
+      allow read: if isSignedIn();
+      allow create: if isWebAdmin();
+      allow update: if isWebAdmin() || isClubAdminForClub(clubId);
+      allow delete: if isWebAdmin();
+    }
+
+    // ClubAdmin data access rules
+    match /Club_Admins/{adminId} {
+      allow read: if isSignedIn() && (request.auth.uid == adminId || isWebAdmin());
+      allow create: if isWebAdmin();
+      allow update: if isSignedIn() && (request.auth.uid == adminId || isWebAdmin());
+      allow delete: if isWebAdmin();
+    }
+
+    // Web_Admin data access rules
+    match /Web_Admin/{adminId} {
+      // Allow creation in three cases:
+      // 1. The user is creating their own admin document (UID matches)
+      // 2. The creator is already a web admin
+      // 3. This is the first admin being created (no other admins exist)
+      allow create: if request.auth != null && (
+        request.auth.uid == adminId ||
+        isWebAdmin() ||
+        !exists(/databases/$(database)/documents/Web_Admin/__any__)
+      );
+
+      allow read, list: if request.auth != null;
+      allow update: if isSignedIn() && (request.auth.uid == adminId || isWebAdmin());
+      allow delete: if isWebAdmin() && request.auth.uid != adminId; // Can't delete yourself
+    }
+
+    // Evaluation data access rules
+    match /evaluations/{evalId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isClubAdminForClub(resource.data.clubID) ||
+        isWebAdmin()
+      );
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if false; // Evaluations are immutable
+      allow delete: if isWebAdmin();
+    }
+
+    // SharedData access rules
+    match /sharedData/{dataId} {
+      allow read: if isSignedIn();
+      allow write: if isWebAdmin();
     }
   }
 }

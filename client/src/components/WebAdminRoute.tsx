@@ -26,7 +26,7 @@ const WebAdminRoute = () => {
     return <div>Loading...</div>; // Or your custom loading component
   }
 
-  return isAdmin ? <Outlet /> : <Navigate to="/home" replace />;
+  return isAdmin ? <Outlet /> : <Navigate to="/web-admin" replace />;
 };
 
 export default WebAdminRoute;

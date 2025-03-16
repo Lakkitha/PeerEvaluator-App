@@ -51,7 +51,7 @@ export async function initializeDatabase() {
 
     // Check if web admin exists
     const webAdminQuery = query(
-      collection(db, "mainWebAdmins"),
+      collection(db, "Web_Admin"), // Changed from "mainWebAdmins"
       where("email", "==", "admin@peerevaluator.com")
     );
     const webAdminSnapshot = await getDocs(webAdminQuery);
@@ -68,7 +68,8 @@ export async function initializeDatabase() {
         );
 
         // Create web admin document
-        await setDoc(doc(db, "mainWebAdmins", userCredential.user.uid), {
+        await setDoc(doc(db, "Web_Admin", userCredential.user.uid), {
+          // Changed from "mainWebAdmins"
           adminName: "Super Admin",
           email: "admin@peerevaluator.com",
           createdAt: new Date().toISOString(),

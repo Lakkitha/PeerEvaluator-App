@@ -8,8 +8,6 @@ import {
   where,
   updateDoc,
   setDoc,
-  serverTimestamp,
-  Timestamp,
   addDoc,
   orderBy,
 } from "firebase/firestore";
@@ -121,7 +119,7 @@ export async function isCurrentUserClubAdmin() {
   }
 
   const adminQuery = query(
-    collection(db, "clubAdmins"),
+    collection(db, "Club_Admins"),
     where("email", "==", auth.currentUser.email)
   );
 
@@ -135,7 +133,7 @@ export async function getCurrentClubAdmin() {
   }
 
   const adminQuery = query(
-    collection(db, "clubAdmins"),
+    collection(db, "Club_Admins"),
     where("email", "==", auth.currentUser.email)
   );
 
@@ -184,17 +182,20 @@ export async function getUnverifiedUsers() {
 
 // Web admin functions
 export async function isCurrentUserWebAdmin() {
+  // First check if user is authenticated
   if (!auth.currentUser) {
     return false;
   }
 
-  const adminQuery = query(
-    collection(db, "mainWebAdmins"),
-    where("email", "==", auth.currentUser.email)
-  );
-
-  const querySnapshot = await getDocs(adminQuery);
-  return !querySnapshot.empty;
+  try {
+    // Check if user document exists in Web_Admin collection using direct document check
+    // which is more efficient and less likely to have permission issues
+    const adminDoc = await getDoc(doc(db, "Web_Admin", auth.currentUser.uid));
+    return adminDoc.exists();
+  } catch (error) {
+    console.error("Error checking web admin status:", error);
+    return false; // Return false on error
+  }
 }
 
 export async function getAllClubs() {
@@ -233,7 +234,7 @@ export async function createClubAdmin(adminData: {
     const now = new Date().toISOString();
 
     // Create the admin document
-    await setDoc(doc(db, "clubAdmins", userCredential.user.uid), {
+    await setDoc(doc(db, "Club_Admins", userCredential.user.uid), {
       adminName: adminData.adminName,
       email: adminData.email,
       clubID: adminData.clubID,
@@ -242,7 +243,7 @@ export async function createClubAdmin(adminData: {
     });
 
     // Update the club with the admin ID
-    await updateDoc(doc(db, "clubs", adminData.clubID), {
+    await updateDoc(doc(db, "Clubs", adminData.clubID), {
       clubAdminID: userCredential.user.uid,
       updatedAt: now,
     });
@@ -330,9 +331,14 @@ export async function getClubById(clubId: string) {
 
 // Add this function
 export async function createClub(clubName: string) {
-  // Only web admins can create clubs
-  if (!(await isCurrentUserWebAdmin())) {
-    throw new Error("Only web admins can create clubs");
+  if (!auth.currentUser) {
+    throw new Error("You must be logged in to create a club");
+  }
+
+  // Check if the current user is a web admin
+  const isAdmin = await isCurrentUserWebAdmin();
+  if (!isAdmin) {
+    throw new Error("Only web administrators can create clubs");
   }
 
   const now = new Date().toISOString();
@@ -344,6 +350,97 @@ export async function createClub(clubName: string) {
     updatedAt: now,
   };
 
-  const clubRef = await addDoc(collection(db, "clubs"), clubData);
-  return { id: clubRef.id, ...clubData };
+  try {
+    const clubRef = await addDoc(collection(db, "clubs"), clubData);
+    return { id: clubRef.id, ...clubData };
+  } catch (error) {
+    console.error("Error creating club:", error);
+    throw new Error("Failed to create the club. Please try again later.");
+  }
+}
+
+// Add these functions to your firebase.ts service
+
+// Check if any web admin exists in the system
+export async function checkWebAdminExists() {
+  const adminQuery = query(collection(db, "Web_Admin")); // Changed from "mainWebAdmins"
+  const snapshot = await getDocs(adminQuery);
+  return !snapshot.empty;
+}
+
+// Get all web admins
+export async function getAllWebAdmins() {
+  // Ensure user is a web admin
+  if (!(await isCurrentUserWebAdmin())) {
+    throw new Error("Only web admins can view all web admins");
+  }
+
+  const webAdminsQuery = query(collection(db, "Web_Admin")); // Changed from "mainWebAdmins"
+  const querySnapshot = await getDocs(webAdminsQuery);
+
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as WebAdmin),
+  }));
+}
+
+// Create a web admin (only for the initial setup or by existing web admins)
+export async function createWebAdmin(adminData: {
+  adminName: string;
+  email: string;
+  password: string;
+}) {
+  const webAdminExists = await checkWebAdminExists();
+
+  // If web admins already exist, only another web admin can create more
+  if (webAdminExists) {
+    const isAdmin = await isCurrentUserWebAdmin();
+    if (!isAdmin) {
+      throw new Error("Only existing web admins can create new web admins");
+    }
+  }
+
+  // Create user account
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    adminData.email,
+    adminData.password
+  );
+
+  // Update profile
+  await updateProfile(userCredential.user, {
+    displayName: adminData.adminName,
+  });
+
+  const now = new Date().toISOString();
+
+  // Create web admin document
+  await setDoc(doc(db, "Web_Admin", userCredential.user.uid), {
+    adminName: adminData.adminName,
+    email: adminData.email,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return {
+    id: userCredential.user.uid,
+    adminName: adminData.adminName,
+    email: adminData.email,
+  };
+}
+
+// Add this function
+export async function getAllClubAdmins() {
+  // Ensure user is a web admin
+  if (!(await isCurrentUserWebAdmin())) {
+    throw new Error("Only web admins can view all club admins");
+  }
+
+  const adminsQuery = query(collection(db, "Club_Admins"));
+  const querySnapshot = await getDocs(adminsQuery);
+
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as ClubAdmin),
+  }));
 }
