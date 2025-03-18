@@ -1,18 +1,15 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import {
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
 } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
-interface LoginProps {
-  isAdminLogin?: boolean;
-}
-
-const Login = ({ isAdminLogin = false }: LoginProps) => {
+const WebAdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,8 +32,30 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
       await setPersistence(auth, persistenceType);
 
       // Now sign in
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/home");
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      // Check if this user is a web admin
+      const adminQuery = query(
+        collection(db, "Web_Admin"), // Changed from "mainWebAdmins"
+        where("email", "==", email)
+      );
+
+      const querySnapshot = await getDocs(adminQuery);
+
+      if (querySnapshot.empty) {
+        // Not a web admin, sign out and show error
+        await auth.signOut();
+        setError("This account is not registered as a web administrator");
+        setLoading(false);
+        return;
+      }
+
+      // Web admin login successful, navigate to web admin dashboard
+      navigate("/webadmin/dashboard");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to log in");
@@ -48,15 +67,11 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
     }
   };
 
-  const pageTitle = isAdminLogin
-    ? "Log In as Club Coordinator"
-    : "Log In to PeerEvaluator";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          {pageTitle}
+          Web Administrator Login
         </h1>
 
         {error && (
@@ -120,15 +135,6 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
                 Remember me
               </label>
             </div>
-
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Forgot your password?
-              </a>
-            </div>
           </div>
 
           <div>
@@ -144,15 +150,17 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
           </div>
         </form>
 
-        <div className="mt-6">
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              to={isAdminLogin ? "/admin/signup" : "/signup"}
-              className="font-medium text-blue-600 hover:text-blue-500"
+        <div className="mt-6 text-center text-sm text-gray-600">
+          <p>
+            This login is restricted to web administrators only.
+            <br />
+            Need an admin account?{" "}
+            <a
+              href="/web-admin/signup"
+              className="text-blue-600 hover:text-blue-500"
             >
-              Sign up here
-            </Link>
+              Register here
+            </a>
           </p>
         </div>
       </div>
@@ -160,4 +168,4 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
   );
 };
 
-export default Login;
+export default WebAdminLogin;

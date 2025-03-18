@@ -9,16 +9,26 @@
   /* Light mode variables */
   --background-color: #ffffff;
   --text-color: #1a1a1a;
+  --text-secondary: #4b5563;
   --border-color: #e5e7eb;
   --card-background: #f9fafb;
+  --card-hover: #f3f4f6;
+  --accent-color: #2563eb; /* Blue 600 from Tailwind */
+  --accent-hover: #1d4ed8; /* Blue 700 from Tailwind */
+  --button-text: #ffffff;
 }
 
 /* Dark mode variables */
 .dark {
-  --background-color: #1a1a1a;
-  --text-color: #f3f4f6;
-  --border-color: #374151;
-  --card-background: #111827;
+  --background-color: #111827; /* Gray 900 from Tailwind */
+  --text-color: #f9fafb; /* Gray 50 from Tailwind */
+  --text-secondary: #d1d5db; /* Gray 300 from Tailwind */
+  --border-color: #374151; /* Gray 700 from Tailwind */
+  --card-background: #1f2937; /* Gray 800 from Tailwind */
+  --card-hover: #374151; /* Gray 700 from Tailwind */
+  --accent-color: #3b82f6; /* Blue 500 from Tailwind - slightly lighter for dark mode */
+  --accent-hover: #2563eb; /* Blue 600 from Tailwind */
+  --button-text: #ffffff;
 }
 
 /* Apply variables */

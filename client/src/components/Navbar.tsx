@@ -2,20 +2,42 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  isCurrentUserClubAdmin,
+  isCurrentUserWebAdmin,
+} from "../services/firebase";
 import ThemeToggle from "../ThemeToggle";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [user, setUser] = useState(auth.currentUser);
+  const [isClubAdmin, setIsClubAdmin] = useState(false);
+  const [isWebAdmin, setIsWebAdmin] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
-  // Monitor authentication state
+  // Monitor authentication state and check admin status
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
+      // Check admin status if user is logged in
+      if (currentUser) {
+        try {
+          const clubAdminStatus = await isCurrentUserClubAdmin();
+          setIsClubAdmin(clubAdminStatus);
+
+          const webAdminStatus = await isCurrentUserWebAdmin();
+          setIsWebAdmin(webAdminStatus);
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+        }
+      } else {
+        setIsClubAdmin(false);
+        setIsWebAdmin(false);
+      }
     });
 
     return () => unsubscribe();
@@ -192,6 +214,28 @@ const Navbar = () => {
                       Profile
                     </Link>
                   </li>
+                  {isClubAdmin && (
+                    <li>
+                      <Link
+                        to="/admin/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        Club Admin
+                      </Link>
+                    </li>
+                  )}
+                  {isWebAdmin && (
+                    <li>
+                      <Link
+                        to="/webadmin/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                      >
+                        Web Admin
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <button
                       onClick={handleLogout}
@@ -207,13 +251,13 @@ const Navbar = () => {
             /* Login/Signup buttons when not logged in */
             <div className="flex space-x-2">
               <Link
-                to="/login"
+                to="/role-select/login"
                 className="py-2 px-3 text-sm text-gray-800 bg-gray-200 hover:bg-gray-300 rounded dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600"
               >
                 Login
               </Link>
               <Link
-                to="/signup"
+                to="/role-select/signup"
                 className="py-2 px-3 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded"
               >
                 Get Started

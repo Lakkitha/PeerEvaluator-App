@@ -6,13 +6,10 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
 } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-interface LoginProps {
-  isAdminLogin?: boolean;
-}
-
-const Login = ({ isAdminLogin = false }: LoginProps) => {
+const ClubAdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -36,7 +33,22 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
 
       // Now sign in
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/home");
+
+      // Get admin data
+      const adminDoc = await getDoc(
+        doc(db, "Club_Admins", auth.currentUser!.uid)
+      );
+
+      if (!adminDoc.exists()) {
+        // Not a club admin, sign out and show error
+        await auth.signOut();
+        setError("This account is not registered as a club coordinator");
+        setLoading(false);
+        return;
+      }
+
+      // Admin login successful, navigate to admin dashboard
+      navigate("/admin/dashboard");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to log in");
@@ -48,15 +60,11 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
     }
   };
 
-  const pageTitle = isAdminLogin
-    ? "Log In as Club Coordinator"
-    : "Log In to PeerEvaluator";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
-          {pageTitle}
+          Club Coordinator Login
         </h1>
 
         {error && (
@@ -146,12 +154,12 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
 
         <div className="mt-6">
           <p className="text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+            Need a coordinator account?{" "}
             <Link
-              to={isAdminLogin ? "/admin/signup" : "/signup"}
+              to="/admin/signup"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              Sign up here
+              Register here
             </Link>
           </p>
         </div>
@@ -160,4 +168,4 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
   );
 };
 
-export default Login;
+export default ClubAdminLogin;

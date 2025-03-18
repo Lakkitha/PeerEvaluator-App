@@ -1,4 +1,6 @@
 import OpenAI from "openai";
+import { auth, db } from "../firebase";
+import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 
 // Create an OpenAI client with your API key
 const openai = new OpenAI({
@@ -140,6 +142,77 @@ export interface SpeechEvaluation {
 }
 
 /**
+ * Parse the evaluation response from OpenAI
+ * @param response - The raw text response from OpenAI
+ * @returns Structured evaluation data
+ */
+export function parseEvaluationResponse(response: string): SpeechEvaluation {
+  try {
+    // This is a simple parser - in a real app, you'd want a more robust parser
+    // or have OpenAI return structured JSON directly
+
+    const scores = {
+      clarity: parseScoreFromText(response, "clarity", "grammar"),
+      coherence: parseScoreFromText(response, "coherence"),
+      delivery: parseScoreFromText(response, "delivery"),
+      vocabulary: parseScoreFromText(response, "vocabulary"),
+      overallImpact: parseScoreFromText(response, "overall", "impact"),
+    };
+
+    // Extract overall feedback
+    const feedback = response;
+
+    // Extract suggestions
+    const suggestionMatches =
+      response.match(/suggestion[s]?:[\s\S]*?(?=\n\n|\n$|$)/gi) || [];
+    const suggestions =
+      suggestionMatches.length > 0
+        ? suggestionMatches[0]
+            .split(/\n-|\n•|\n\d+\./)
+            .filter(Boolean)
+            .map((s) => s.trim())
+        : [];
+
+    return {
+      ...scores,
+      feedback,
+      suggestions:
+        suggestions.length > 0
+          ? suggestions
+          : ["Work on overall delivery and clarity"],
+    };
+  } catch (error) {
+    console.error("Error parsing evaluation:", error);
+    return {
+      clarity: 5,
+      coherence: 5,
+      delivery: 5,
+      vocabulary: 5,
+      overallImpact: 5,
+      feedback: response,
+      suggestions: ["Unable to parse specific suggestions"],
+    };
+  }
+}
+
+// Helper function to parse scores from text
+function parseScoreFromText(text: string, ...keywords: string[]): number {
+  // Look for patterns like "Clarity: 7/10" or "Grammar score: 7"
+  for (const keyword of keywords) {
+    const regex = new RegExp(
+      `${keyword}[^\\d]*(\\d{1,2})(?:\\s*\\/\\s*10)?`,
+      "i"
+    );
+    const match = text.match(regex);
+    if (match && match[1]) {
+      const score = parseInt(match[1], 10);
+      if (score >= 0 && score <= 10) return score;
+    }
+  }
+  return 5; // Default score if not found
+}
+
+/**
  * Analyzes speech content and provides evaluation
  * @param transcription - The text transcription to analyze
  * @returns Feedback as a formatted string with scores and suggestions
@@ -161,10 +234,73 @@ export async function evaluateSpeech(transcription: string): Promise<string> {
       ],
     });
 
-    return completion.choices[0].message.content || "";
+    const response = completion.choices[0].message.content || "";
+
+    // Save the evaluation to Firestore if user is logged in
+    try {
+      if (auth.currentUser) {
+        const parsedEvaluation = parseEvaluationResponse(response);
+        await saveEvaluationToFirestore(
+          transcription,
+          parsedEvaluation,
+          response
+        );
+      }
+    } catch (saveError) {
+      console.error("Error saving evaluation to Firestore:", saveError);
+      // Continue without failing the overall function
+    }
+
+    return response;
   } catch (error) {
     console.error("Error evaluating speech:", error);
     throw new Error("Failed to evaluate speech");
+  }
+}
+
+/**
+ * Save the speech evaluation to Firestore
+ * @param transcript - The speech transcript
+ * @param evaluation - The parsed evaluation data
+ * @param rawResponse - The raw response from the API
+ */
+export async function saveEvaluationToFirestore(
+  transcript: string,
+  evaluation: SpeechEvaluation,
+  rawResponse: string
+): Promise<string> {
+  if (!auth.currentUser) {
+    throw new Error("User not authenticated");
+  }
+
+  try {
+    // Get the user's club ID
+    const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+    const userData = userDoc.data();
+    const clubID = userData?.clubID || null;
+
+    const evalData = {
+      userId: auth.currentUser.uid,
+      date: new Date().toISOString(),
+      transcript: transcript,
+      scores: {
+        clarity: evaluation.clarity,
+        coherence: evaluation.coherence,
+        delivery: evaluation.delivery,
+        vocabulary: evaluation.vocabulary,
+        overallImpact: evaluation.overallImpact,
+      },
+      feedback: rawResponse,
+      suggestions: evaluation.suggestions,
+      createdAt: new Date().toISOString(),
+      clubID: clubID, // Add the club ID to the evaluation data
+    };
+
+    const docRef = await addDoc(collection(db, "evaluations"), evalData);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error saving evaluation:", error);
+    throw new Error("Failed to save evaluation data");
   }
 }
 
