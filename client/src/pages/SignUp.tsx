@@ -76,33 +76,42 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
 
       const now = new Date().toISOString();
 
-      // Create a user document in Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), {
-        username: name,
-        email,
-        clubID: selectedClub,
-        userLevel: "Beginner",
-        userPicture: null,
-        isVerified: false,
-        createdAt: now,
-        updatedAt: now,
-      });
+      try {
+        // Create a user document in Firestore
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          username: name,
+          email,
+          clubID: selectedClub,
+          userLevel: "Beginner",
+          userPicture: null,
+          isVerified: false,
+          createdAt: now,
+          updatedAt: now,
+        });
 
-      // Create entry in shared data
-      await setDoc(doc(db, "sharedData", userCredential.user.uid), {
-        userID: userCredential.user.uid,
-        username: name,
-        clubID: selectedClub,
-        userLevel: "Beginner",
-      });
+        // Create entry in shared data
+        await setDoc(doc(db, "sharedData", userCredential.user.uid), {
+          userID: userCredential.user.uid,
+          username: name,
+          clubID: selectedClub,
+          userLevel: "Beginner",
+        });
 
-      // Redirect to home
-      navigate("/home");
+        // Redirect to home
+        navigate("/home");
+      } catch (firestoreError) {
+        // If Firestore operations fail, delete the user to avoid orphaned accounts
+        console.error("Error creating user documents:", firestoreError);
+        await userCredential.user.delete();
+        throw new Error("Failed to create user documents. Please try again.");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Failed to create account");
+        console.error("Signup error:", err);
       } else {
         setError("Failed to create account");
+        console.error("Unknown signup error:", err);
       }
     } finally {
       setLoading(false);

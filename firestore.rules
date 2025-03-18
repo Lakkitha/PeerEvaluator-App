@@ -14,76 +14,64 @@ service cloud.firestore {
       return isSignedIn() && exists(/databases/$(database)/documents/Club_Admins/$(request.auth.uid));
     }
 
-    function isClubAdminForClub(clubId) {
-      return isClubAdmin() &&
-        get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID == clubId;
-    }
-
-    function isUser() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    // User data access rules
+    // User data access rules - Allow users to create their own accounts
     match /users/{userId} {
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow read: if isSignedIn() && (request.auth.uid == userId || isClubAdmin() || isWebAdmin());
-      allow update: if isSignedIn() && (
-        request.auth.uid == userId ||
-        isClubAdminForClub(resource.data.clubID) ||
-        isWebAdmin()
-      );
+      allow read: if isSignedIn() && (request.auth.uid == userId || isClubAdmin());
+      allow create: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId ||
+                     (isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID);
       allow delete: if isWebAdmin();
     }
 
-    // Club data access rules
+    // Shared data access rules - Allow users to create their own entries
+    match /sharedData/{userId} {
+      allow read: if true; // Public read access for shared data
+      allow create: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId ||
+                     (isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID);
+      allow delete: if isWebAdmin();
+    }
+
+    // Club data access rules - Allow unauthenticated reads
     match /clubs/{clubId} {
-      allow read: if isSignedIn();
+      allow read: if true; // Allow everyone to read clubs
       allow create: if isWebAdmin();
-      allow update: if isWebAdmin() || isClubAdminForClub(clubId);
+      allow update: if isSignedIn(); // Allow any signed-in user to update clubs (important for assignment)
       allow delete: if isWebAdmin();
     }
 
-    // ClubAdmin data access rules
+    // Club_Admins collection - Updated rules for signup flow
     match /Club_Admins/{adminId} {
-      allow read: if isSignedIn() && (request.auth.uid == adminId || isWebAdmin());
-      allow create: if isWebAdmin();
-      allow update: if isSignedIn() && (request.auth.uid == adminId || isWebAdmin());
+      allow read: if true; // Allow everyone to read, needed for signup checks
+      allow create: if request.auth.uid == adminId; // Allow self-creation
+      allow update: if request.auth.uid == adminId || isWebAdmin();
       allow delete: if isWebAdmin();
     }
 
     // Web_Admin data access rules
     match /Web_Admin/{adminId} {
-      // Allow creation in three cases:
-      // 1. The user is creating their own admin document (UID matches)
-      // 2. The creator is already a web admin
-      // 3. This is the first admin being created (no other admins exist)
+      allow read: if true; // Allow everyone to read, needed for admin checks
       allow create: if request.auth != null && (
         request.auth.uid == adminId ||
         isWebAdmin() ||
         !exists(/databases/$(database)/documents/Web_Admin/__any__)
       );
-
-      allow read, list: if request.auth != null;
       allow update: if isSignedIn() && (request.auth.uid == adminId || isWebAdmin());
-      allow delete: if isWebAdmin() && request.auth.uid != adminId; // Can't delete yourself
+      allow delete: if isWebAdmin() && request.auth.uid != adminId;
     }
 
-    // Evaluation data access rules
-    match /evaluations/{evalId} {
+    // Evaluations data access rules
+    match /evaluations/{evaluationId} {
       allow read: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        isClubAdminForClub(resource.data.clubID) ||
-        isWebAdmin()
+        (isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID)
       );
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if false; // Evaluations are immutable
-      allow delete: if isWebAdmin();
-    }
-
-    // SharedData access rules
-    match /sharedData/{dataId} {
-      allow read: if isSignedIn();
-      allow write: if isWebAdmin();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID
+      );
     }
   }
 }

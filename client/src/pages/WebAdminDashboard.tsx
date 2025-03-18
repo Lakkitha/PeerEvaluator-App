@@ -5,6 +5,7 @@ import {
   getAllClubs,
   createClubAdmin,
   createClub,
+  getAllClubAdmins,
 } from "../services/firebase";
 
 interface Club {
@@ -63,7 +64,7 @@ const WebAdminDashboard = () => {
       const clubsData = await getAllClubs();
       setClubs(clubsData);
 
-      // Uncomment and use the getAllClubAdmins function
+      // This function was causing the error because it wasn't imported
       const adminsData = await getAllClubAdmins();
       setClubAdmins(adminsData);
     } catch (err) {

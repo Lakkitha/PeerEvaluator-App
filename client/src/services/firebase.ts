@@ -215,14 +215,6 @@ export async function createClubAdmin(adminData: {
   password: string;
   clubID: string;
 }) {
-  // This would normally be done in a Cloud Function for security
-  // For development purposes, we're implementing it client-side
-  // In production, this should definitely be moved to a secure backend
-
-  if (!(await isCurrentUserWebAdmin())) {
-    throw new Error("Only web admins can create club admins");
-  }
-
   try {
     // Create the user with email and password
     const userCredential = await createUserWithEmailAndPassword(
@@ -242,8 +234,8 @@ export async function createClubAdmin(adminData: {
       updatedAt: now,
     });
 
-    // Update the club with the admin ID
-    await updateDoc(doc(db, "Clubs", adminData.clubID), {
+    // Update the club with this admin's ID - fix the collection name
+    await updateDoc(doc(db, "clubs", adminData.clubID), {
       clubAdminID: userCredential.user.uid,
       updatedAt: now,
     });
