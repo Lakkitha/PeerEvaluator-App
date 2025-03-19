@@ -1,5 +1,4 @@
 import AudioRecorder from "../components/AudioRecorder";
-import ApiKeyTester from "../components/ApiKeyTester";
 import { useState, useEffect } from "react";
 import { evaluateSpeech } from "../services/openai";
 import { isUserVerified } from "../services/firebase";
@@ -9,7 +8,6 @@ const SpeechEvaluation = () => {
   const [transcript, setTranscript] = useState<string>("");
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [showApiTester, setShowApiTester] = useState<boolean>(false);
   const [verificationStatus, setVerificationStatus] = useState<boolean | null>(
     null
   );
@@ -121,18 +119,6 @@ const SpeechEvaluation = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Speech Evaluation</h1>
-
-      {/* Add a toggle button for API tester */}
-      <div className="flex justify-center mb-4">
-        <button
-          onClick={() => setShowApiTester(!showApiTester)}
-          className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-        >
-          {showApiTester ? "Hide API Tester" : "Show API Tester"}
-        </button>
-      </div>
-
-      {showApiTester && <ApiKeyTester />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
