@@ -2,6 +2,8 @@ import AudioRecorder from "../components/AudioRecorder";
 import { useState, useEffect } from "react";
 import { evaluateSpeech } from "../services/openai";
 import { isUserVerified } from "../services/firebase";
+import { Link } from "react-router-dom";
+// import { auth } from "../firebase";
 
 const SpeechEvaluation = () => {
   const [evaluation, setEvaluation] = useState<string>("");
@@ -12,6 +14,7 @@ const SpeechEvaluation = () => {
     null
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [hasEvaluations, setHasEvaluations] = useState<boolean>(false);
 
   // Check if user is verified
   useEffect(() => {
@@ -46,6 +49,7 @@ const SpeechEvaluation = () => {
       setError("");
       const result = await evaluateSpeech(transcript);
       setEvaluation(result);
+      setHasEvaluations(true); // Set to true when evaluation is successful
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -143,6 +147,26 @@ const SpeechEvaluation = () => {
               {error}
             </div>
           )}
+
+          {/* Progress Tracking Link Section */}
+          <div className="mt-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Track Your Progress</h2>
+                <Link
+                  to="/progresstracking"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200"
+                >
+                  View Progress
+                </Link>
+              </div>
+              <p className="mt-3 text-gray-600">
+                {hasEvaluations
+                  ? "View your speech history and track improvements over time."
+                  : "Complete your first evaluation to start tracking your progress."}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -160,6 +184,25 @@ const SpeechEvaluation = () => {
               <h2 className="text-2xl font-bold mb-4">Speech Evaluation</h2>
               <div className="prose prose-sm">
                 <pre className="whitespace-pre-wrap">{evaluation}</pre>
+              </div>
+
+              {/* After evaluation tip */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-sm text-blue-800 flex items-center">
+                  <svg
+                    className="h-5 w-5 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Your evaluation has been saved! Visit the Progress Tracking
+                  page to see your improvement over time.
+                </p>
               </div>
             </div>
           )}
