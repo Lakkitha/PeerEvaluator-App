@@ -25,8 +25,11 @@ const ProgressTracker = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Use array for multiple metrics selection
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(["overallImpact"]);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([
+    "overallImpact",
+  ]);
   const [timeframe, setTimeframe] = useState<string>("all");
+  const [showAllMetrics, setShowAllMetrics] = useState(false);
 
   useEffect(() => {
     const fetchEvaluations = async () => {
@@ -118,7 +121,8 @@ const ProgressTracker = () => {
         coherence: acc.coherence + (evaluation.scores.coherence || 0),
         delivery: acc.delivery + (evaluation.scores.delivery || 0),
         vocabulary: acc.vocabulary + (evaluation.scores.vocabulary || 0),
-        overallImpact: acc.overallImpact + (evaluation.scores.overallImpact || 0),
+        overallImpact:
+          acc.overallImpact + (evaluation.scores.overallImpact || 0),
         fluency: acc.fluency + (evaluation.scores.fluency || 0),
         engagement: acc.engagement + (evaluation.scores.engagement || 0),
       }),
@@ -129,7 +133,7 @@ const ProgressTracker = () => {
         vocabulary: 0,
         overallImpact: 0,
         fluency: 0,
-        engagement: 0
+        engagement: 0,
       }
     );
 
@@ -151,6 +155,19 @@ const ProgressTracker = () => {
         ? prev.filter((m) => m !== metric)
         : [...prev, metric]
     );
+  };
+
+  // Add a function to handle toggling the "All" option
+  const toggleAllMetrics = () => {
+    setShowAllMetrics((prev) => !prev);
+    // If turning on "All", we clear individual selections
+    if (!showAllMetrics) {
+      setSelectedMetrics([]);
+    }
+    // If turning off "All", we default to overall impact
+    else {
+      setSelectedMetrics(["overallImpact"]);
+    }
   };
 
   if (loading) {
@@ -202,29 +219,45 @@ const ProgressTracker = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Metrics to Display
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { id: "clarity", label: "Clarity" },
-                    { id: "coherence", label: "Coherence" },
-                    { id: "delivery", label: "Delivery" },
-                    { id: "vocabulary", label: "Vocabulary" },
-                    { id: "fluency", label: "Fluency" },
-                    { id: "engagement", label: "Engagement" },
-                    { id: "overallImpact", label: "Overall Impact" },
-                  ].map((metric) => (
-                    <button
-                      key={metric.id}
-                      onClick={() => toggleMetric(metric.id)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        selectedMetrics.includes(metric.id)
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-200 text-gray-800"
-                      }`}
-                    >
-                      {metric.label}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <button
+                    onClick={toggleAllMetrics}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      showAllMetrics
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    All Metrics
+                  </button>
                 </div>
+
+                {/* Only show individual metrics if "All" is not selected */}
+                {!showAllMetrics && (
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: "clarity", label: "Clarity" },
+                      { id: "coherence", label: "Coherence" },
+                      { id: "delivery", label: "Delivery" },
+                      { id: "vocabulary", label: "Vocabulary" },
+                      { id: "fluency", label: "Fluency" },
+                      { id: "engagement", label: "Engagement" },
+                      { id: "overallImpact", label: "Overall Impact" },
+                    ].map((metric) => (
+                      <button
+                        key={metric.id}
+                        onClick={() => toggleMetric(metric.id)}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          selectedMetrics.includes(metric.id)
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-200 text-gray-800"
+                        }`}
+                      >
+                        {metric.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Timeframe selection */}
@@ -252,6 +285,7 @@ const ProgressTracker = () => {
               evaluations={filteredEvaluations()}
               selectedMetrics={selectedMetrics}
               timeframe={timeframe}
+              allMetrics={showAllMetrics}
             />
           </div>
 

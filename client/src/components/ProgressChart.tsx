@@ -24,12 +24,14 @@ interface ProgressChartProps {
   }[];
   selectedMetrics: string[];
   timeframe: string;
+  allMetrics?: boolean; // New prop to indicate if "All" is selected
 }
 
 const ProgressChart = ({
   evaluations,
   selectedMetrics,
   timeframe,
+  allMetrics = false, // Default to false
 }: ProgressChartProps) => {
   const [chartData, setChartData] = useState<any>(null);
 
@@ -55,6 +57,17 @@ const ProgressChart = ({
     engagement: "Engagement",
   };
 
+  // Define all available metrics
+  const availableMetrics = [
+    "clarity",
+    "coherence",
+    "delivery",
+    "vocabulary",
+    "overallImpact",
+    "fluency",
+    "engagement",
+  ];
+
   useEffect(() => {
     if (!evaluations || !evaluations.length) return;
 
@@ -68,8 +81,11 @@ const ProgressChart = ({
       new Date(evaluation.date).toLocaleDateString()
     );
 
+    // Determine which metrics to show
+    const metricsToShow = allMetrics ? availableMetrics : selectedMetrics;
+
     // Create series data for each selected metric
-    const series = selectedMetrics.map((metric) => ({
+    const series = metricsToShow.map((metric) => ({
       name: metricLabels[metric as keyof typeof metricLabels],
       data: sortedEvals.map(
         (evaluation) =>
@@ -188,7 +204,7 @@ const ProgressChart = ({
     };
 
     setChartData({ options, series });
-  }, [evaluations, selectedMetrics, timeframe]);
+  }, [evaluations, selectedMetrics, timeframe, allMetrics]);
 
   if (!chartData || evaluations.length === 0) {
     return (
@@ -218,11 +234,19 @@ const ProgressChart = ({
             Speech Evaluation Progress
           </Typography>
           <Typography variant="small" color="gray" className="font-normal">
-            Track your improvements in{" "}
-            {selectedMetrics.length === 1
-              ? metricLabels[selectedMetrics[0] as keyof typeof metricLabels]
-              : "multiple speaking metrics"}{" "}
-            over time
+            {allMetrics ? (
+              "Tracking all speaking metrics over time"
+            ) : (
+              <>
+                Track your improvements in{" "}
+                {selectedMetrics.length === 1
+                  ? metricLabels[
+                      selectedMetrics[0] as keyof typeof metricLabels
+                    ]
+                  : "multiple speaking metrics"}{" "}
+                over time
+              </>
+            )}
           </Typography>
         </div>
       </CardHeader>
