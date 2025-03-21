@@ -205,8 +205,11 @@ function parseScoreFromText(text: string, ...keywords: string[]): number {
     );
     const match = text.match(regex);
     if (match && match[1]) {
-      const score = parseInt(match[1], 10);
-      if (score >= 0 && score <= 10) return score;
+      // Add null check for match[1]
+      const score = parseInt(match[1]);
+      if (!isNaN(score) && score >= 0 && score <= 10) {
+        return score;
+      }
     }
   }
   return 5; // Default score if not found

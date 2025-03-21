@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Typography,
-} from "@material-tailwind/react";
+// Remove unused Material Tailwind imports
 import Chart from "react-apexcharts";
 import { ChartBarIcon } from "@heroicons/react/24/outline";
+import { ApexOptions } from "apexcharts";
+
+// Define type for chart data to avoid 'any'
+interface ChartDataType {
+  options: ApexOptions;
+  series: {
+    name: string;
+    data: number[];
+    color: string;
+  }[];
+}
 
 interface ProgressChartProps {
   evaluations: {
@@ -24,16 +30,16 @@ interface ProgressChartProps {
   }[];
   selectedMetrics: string[];
   timeframe: string;
-  allMetrics?: boolean; // New prop to indicate if "All" is selected
+  allMetrics?: boolean;
 }
 
 const ProgressChart = ({
   evaluations,
   selectedMetrics,
   timeframe,
-  allMetrics = false, // Default to false
+  allMetrics = false,
 }: ProgressChartProps) => {
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartDataType | null>(null);
 
   // Define color palette for metrics
   const metricColors = {
@@ -95,7 +101,7 @@ const ProgressChart = ({
     }));
 
     // Configure the ApexCharts options
-    const options = {
+    const options: ApexOptions = {
       chart: {
         type: "line",
         toolbar: {
@@ -136,6 +142,7 @@ const ProgressChart = ({
         hover: {
           size: 7,
         },
+        // Remove the width property that's causing the error
       },
       tooltip: {
         theme: "dark",
@@ -192,8 +199,8 @@ const ProgressChart = ({
         position: "top",
         horizontalAlign: "center",
         fontSize: "14px",
+        // Remove the width property from markers
         markers: {
-          width: 12,
           height: 12,
           radius: 12,
         },
@@ -204,36 +211,37 @@ const ProgressChart = ({
     };
 
     setChartData({ options, series });
-  }, [evaluations, selectedMetrics, timeframe, allMetrics]);
+  }, [
+    evaluations,
+    selectedMetrics,
+    timeframe,
+    allMetrics,
+    availableMetrics,
+    metricColors,
+    metricLabels,
+  ]);
 
   if (!chartData || evaluations.length === 0) {
     return (
-      <Card className="w-full shadow-lg">
-        <CardBody className="h-64 flex items-center justify-center bg-gray-50">
-          <Typography variant="h6" color="gray">
-            No data available
-          </Typography>
-        </CardBody>
-      </Card>
+      <div className="w-full shadow-lg bg-white rounded-lg">
+        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+          <p className="text-gray-500 font-medium text-lg">No data available</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader
-        floated={false}
-        shadow={false}
-        color="transparent"
-        className="flex flex-col gap-4 rounded-none md:flex-row md:items-center px-6 py-4"
-      >
-        <div className="w-max rounded-lg bg-blue-600 p-3 text-white">
+    <div className="w-full shadow-lg bg-white rounded-lg">
+      <div className="flex flex-col gap-4 rounded-none md:flex-row md:items-center px-6 py-4 border-b">
+        <div className="w-12 h-12 rounded-lg bg-blue-600 p-3 text-white flex items-center justify-center">
           <ChartBarIcon className="h-6 w-6" />
         </div>
         <div>
-          <Typography variant="h6" color="blue-gray">
+          <h3 className="text-lg font-semibold text-gray-800">
             Speech Evaluation Progress
-          </Typography>
-          <Typography variant="small" color="gray" className="font-normal">
+          </h3>
+          <p className="text-sm text-gray-600">
             {allMetrics ? (
               "Tracking all speaking metrics over time"
             ) : (
@@ -247,10 +255,10 @@ const ProgressChart = ({
                 over time
               </>
             )}
-          </Typography>
+          </p>
         </div>
-      </CardHeader>
-      <CardBody className="px-4 pb-4 pt-0">
+      </div>
+      <div className="px-4 pb-4 pt-0">
         <div className="h-[400px]">
           {chartData && (
             <Chart
@@ -261,8 +269,8 @@ const ProgressChart = ({
             />
           )}
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 };
 
