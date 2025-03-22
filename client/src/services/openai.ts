@@ -170,7 +170,7 @@ export function parseEvaluationResponse(response: string): SpeechEvaluation {
         ? suggestionMatches[0]
             .split(/\n-|\n•|\n\d+\./)
             .filter(Boolean)
-            .map((s) => s.trim())
+            .map((s) => s?.trim() || "")
         : [];
 
     return {
@@ -205,8 +205,11 @@ function parseScoreFromText(text: string, ...keywords: string[]): number {
     );
     const match = text.match(regex);
     if (match && match[1]) {
-      const score = parseInt(match[1], 10);
-      if (score >= 0 && score <= 10) return score;
+      // Add null check for match[1]
+      const score = parseInt(match[1]);
+      if (!isNaN(score) && score >= 0 && score <= 10) {
+        return score;
+      }
     }
   }
   return 5; // Default score if not found
@@ -225,7 +228,7 @@ export async function evaluateSpeech(transcription: string): Promise<string> {
         {
           role: "system",
           content:
-            "You are a professional speech coach. Analyze the following speech transcript and provide constructive feedback on: grammer, fluency, coherence, delivery, Engagement levels, and overall impact. Score each category from 1-10 and provide specific suggestions for improvement.",
+            "You are a professional speech coach. Analyze the following speech transcript and provide constructive feedback on: grammar, fluency, coherence, delivery, engagement levels, and overall impact. Score each category from 1-10 and provide specific suggestions for improvement.",
         },
         {
           role: "user",
@@ -279,6 +282,7 @@ export async function saveEvaluationToFirestore(
     const userData = userDoc.data();
     const clubID = userData?.clubID || null;
 
+    // Make sure we're storing all the metrics mentioned in the system prompt
     const evalData = {
       userId: auth.currentUser.uid,
       date: new Date().toISOString(),
@@ -288,6 +292,13 @@ export async function saveEvaluationToFirestore(
         coherence: evaluation.coherence,
         delivery: evaluation.delivery,
         vocabulary: evaluation.vocabulary,
+        // Add the missing metrics from the prompt
+        fluency: parseScoreFromText(rawResponse, "fluency"),
+        engagement: parseScoreFromText(
+          rawResponse,
+          "engagement",
+          "engagement levels"
+        ),
         overallImpact: evaluation.overallImpact,
       },
       feedback: rawResponse,

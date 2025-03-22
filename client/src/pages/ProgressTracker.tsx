@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import ProgressChart from "../components/ProgressChart";
 
 interface EvaluationData {
   id: string;
@@ -12,6 +13,8 @@ interface EvaluationData {
     delivery: number;
     vocabulary: number;
     overallImpact: number;
+    fluency?: number;
+    engagement?: number;
   };
   feedback: string;
 }
@@ -20,8 +23,13 @@ const ProgressTracker = () => {
   const [evaluations, setEvaluations] = useState<EvaluationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMetric, setSelectedMetric] = useState<string>("overallImpact");
+
+  // Use array for multiple metrics selection
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([
+    "overallImpact",
+  ]);
   const [timeframe, setTimeframe] = useState<string>("all");
+  const [showAllMetrics, setShowAllMetrics] = useState(false);
 
   useEffect(() => {
     const fetchEvaluations = async () => {
@@ -55,6 +63,8 @@ const ProgressTracker = () => {
               delivery: data.scores.delivery || 0,
               vocabulary: data.scores.vocabulary || 0,
               overallImpact: data.scores.overallImpact || 0,
+              fluency: data.scores.fluency || 0,
+              engagement: data.scores.engagement || 0,
             },
             feedback: data.feedback,
           });
@@ -72,7 +82,6 @@ const ProgressTracker = () => {
     fetchEvaluations();
   }, []);
 
-  // Fix the filter function - replace 'eval' with 'evaluation'
   const filteredEvaluations = () => {
     if (timeframe === "all") return evaluations;
 
@@ -93,7 +102,6 @@ const ProgressTracker = () => {
     });
   };
 
-  // Fix in calculateAverages function
   const calculateAverages = () => {
     const filtered = filteredEvaluations();
     if (filtered.length === 0)
@@ -103,17 +111,30 @@ const ProgressTracker = () => {
         delivery: 0,
         vocabulary: 0,
         overallImpact: 0,
+        fluency: 0,
+        engagement: 0,
       };
 
     const totals = filtered.reduce(
       (acc, evaluation) => ({
-        clarity: acc.clarity + evaluation.scores.clarity,
-        coherence: acc.coherence + evaluation.scores.coherence,
-        delivery: acc.delivery + evaluation.scores.delivery,
-        vocabulary: acc.vocabulary + evaluation.scores.vocabulary,
-        overallImpact: acc.overallImpact + evaluation.scores.overallImpact,
+        clarity: acc.clarity + (evaluation.scores.clarity || 0),
+        coherence: acc.coherence + (evaluation.scores.coherence || 0),
+        delivery: acc.delivery + (evaluation.scores.delivery || 0),
+        vocabulary: acc.vocabulary + (evaluation.scores.vocabulary || 0),
+        overallImpact:
+          acc.overallImpact + (evaluation.scores.overallImpact || 0),
+        fluency: acc.fluency + (evaluation.scores.fluency || 0),
+        engagement: acc.engagement + (evaluation.scores.engagement || 0),
       }),
-      { clarity: 0, coherence: 0, delivery: 0, vocabulary: 0, overallImpact: 0 }
+      {
+        clarity: 0,
+        coherence: 0,
+        delivery: 0,
+        vocabulary: 0,
+        overallImpact: 0,
+        fluency: 0,
+        engagement: 0,
+      }
     );
 
     return {
@@ -122,51 +143,31 @@ const ProgressTracker = () => {
       delivery: totals.delivery / filtered.length,
       vocabulary: totals.vocabulary / filtered.length,
       overallImpact: totals.overallImpact / filtered.length,
+      fluency: totals.fluency / filtered.length,
+      engagement: totals.engagement / filtered.length,
     };
   };
 
-  // Fix the map function in renderMockChart to use 'evaluation' instead of 'eval'
-  const renderMockChart = () => {
-    const filtered = filteredEvaluations();
-    if (filtered.length === 0) {
-      return (
-        <div className="p-8 text-center text-gray-600">
-          No data available for the selected timeframe
-        </div>
-      );
-    }
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-xl font-semibold mb-4">
-          Progress Chart for {selectedMetric}
-        </h3>
-        <div className="h-64 border border-gray-200 rounded-lg flex items-end justify-around p-4 bg-gray-50">
-          {filtered.map((evaluation, index) => {
-            const value =
-              evaluation.scores[
-                selectedMetric as keyof typeof evaluation.scores
-              ] * 10; // Scale to percentage of height
-            const date = new Date(evaluation.date).toLocaleDateString();
-
-            return (
-              <div key={index} className="flex flex-col items-center">
-                <div
-                  className="bg-blue-600 w-8"
-                  style={{ height: `${value}%` }}
-                  title={`Score: ${
-                    evaluation.scores[
-                      selectedMetric as keyof typeof evaluation.scores
-                    ]
-                  }/10`}
-                ></div>
-                <span className="text-xs mt-2">{date}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+  // Method to toggle metrics selection
+  const toggleMetric = (metric: string) => {
+    setSelectedMetrics((prev) =>
+      prev.includes(metric)
+        ? prev.filter((m) => m !== metric)
+        : [...prev, metric]
     );
+  };
+
+  // Add a function to handle toggling the "All" option
+  const toggleAllMetrics = () => {
+    setShowAllMetrics((prev) => !prev);
+    // If turning on "All", we clear individual selections
+    if (!showAllMetrics) {
+      setSelectedMetrics([]);
+    }
+    // If turning off "All", we default to overall impact
+    else {
+      setSelectedMetrics(["overallImpact"]);
+    }
   };
 
   if (loading) {
@@ -209,43 +210,84 @@ const ProgressTracker = () => {
       ) : (
         <>
           {/* Controls */}
-          <div className="flex flex-wrap gap-4 mb-8">
-            <div className="bg-white p-4 rounded-lg shadow-md flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Metric
-              </label>
-              <select
-                value={selectedMetric}
-                onChange={(e) => setSelectedMetric(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="clarity">Clarity</option>
-                <option value="coherence">Coherence</option>
-                <option value="delivery">Delivery</option>
-                <option value="vocabulary">Vocabulary</option>
-                <option value="overallImpact">Overall Impact</option>
-              </select>
-            </div>
+          <div className="mb-8">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-lg font-semibold mb-4">Chart Options</h2>
 
-            <div className="bg-white p-4 rounded-lg shadow-md flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Timeframe
-              </label>
-              <select
-                value={timeframe}
-                onChange={(e) => setTimeframe(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All Time</option>
-                <option value="week">Past Week</option>
-                <option value="month">Past Month</option>
-                <option value="year">Past Year</option>
-              </select>
+              {/* Metric selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Metrics to Display
+                </label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <button
+                    onClick={toggleAllMetrics}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      showAllMetrics
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    All Metrics
+                  </button>
+                </div>
+
+                {/* Only show individual metrics if "All" is not selected */}
+                {!showAllMetrics && (
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: "clarity", label: "Clarity" },
+                      { id: "coherence", label: "Coherence" },
+                      { id: "delivery", label: "Delivery" },
+                      { id: "vocabulary", label: "Vocabulary" },
+                      { id: "fluency", label: "Fluency" },
+                      { id: "engagement", label: "Engagement" },
+                      { id: "overallImpact", label: "Overall Impact" },
+                    ].map((metric) => (
+                      <button
+                        key={metric.id}
+                        onClick={() => toggleMetric(metric.id)}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          selectedMetrics.includes(metric.id)
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-200 text-gray-800"
+                        }`}
+                      >
+                        {metric.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Timeframe selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Timeframe
+                </label>
+                <select
+                  value={timeframe}
+                  onChange={(e) => setTimeframe(e.target.value)}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Time</option>
+                  <option value="week">Past Week</option>
+                  <option value="month">Past Month</option>
+                  <option value="year">Past Year</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Charts */}
-          <div className="mb-8">{renderMockChart()}</div>
+          {/* Chart Component */}
+          <div className="mb-8">
+            <ProgressChart
+              evaluations={filteredEvaluations()}
+              selectedMetrics={selectedMetrics}
+              timeframe={timeframe}
+              allMetrics={showAllMetrics}
+            />
+          </div>
 
           {/* Summary */}
           <div className="bg-white p-6 rounded-lg shadow-md mb-8">
