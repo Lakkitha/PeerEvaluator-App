@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-// Remove unused Material Tailwind imports
+import { useState, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
-import { ChartBarIcon } from "@heroicons/react/24/outline";
 import { ApexOptions } from "apexcharts";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 // Define type for chart data to avoid 'any'
 interface ChartDataType {
@@ -40,42 +39,79 @@ const ProgressChart = ({
   allMetrics = false,
 }: ProgressChartProps) => {
   const [chartData, setChartData] = useState<ChartDataType | null>(null);
+  const [activeTimeframe, setActiveTimeframe] = useState(timeframe);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Define color palette for metrics
-  const metricColors = {
-    clarity: "#3b82f6", // blue-500
-    coherence: "#ef4444", // red-500
-    delivery: "#10b981", // emerald-500
-    vocabulary: "#f97316", // orange-500
-    overallImpact: "#8b5cf6", // violet-500
-    fluency: "#eab308", // yellow-500
-    engagement: "#6b7280", // gray-500
+  // Calculate average scores for the top metrics display
+  const calculateAverages = () => {
+    if (!evaluations || !evaluations.length) return {};
+
+    const totals = evaluations.reduce(
+      (acc, evaluation) => {
+        return {
+          clarity: acc.clarity + (evaluation.scores.clarity || 0),
+          overallImpact:
+            acc.overallImpact + (evaluation.scores.overallImpact || 0),
+        };
+      },
+      { clarity: 0, overallImpact: 0 }
+    );
+
+    return {
+      clarity: (totals.clarity / evaluations.length).toFixed(1),
+      overallImpact: (totals.overallImpact / evaluations.length).toFixed(1),
+    };
   };
 
-  // Define labels for metrics
-  const metricLabels = {
-    clarity: "Clarity",
-    coherence: "Coherence",
-    delivery: "Delivery",
-    vocabulary: "Vocabulary",
-    overallImpact: "Overall Impact",
-    fluency: "Fluency",
-    engagement: "Engagement",
-  };
+  const averages = calculateAverages();
 
-  // Define all available metrics
-  const availableMetrics = [
-    "clarity",
-    "coherence",
-    "delivery",
-    "vocabulary",
-    "overallImpact",
-    "fluency",
-    "engagement",
-  ];
+  // Use useMemo to fix dependency warnings
+  const metricColors = useMemo(
+    () => ({
+      clarity: "#3b82f6", // blue-500
+      coherence: "#ef4444", // red-500
+      delivery: "#10b981", // emerald-500
+      vocabulary: "#f97316", // orange-500
+      overallImpact: "#8b5cf6", // violet-500
+      fluency: "#eab308", // yellow-500
+      engagement: "#6b7280", // gray-500
+    }),
+    []
+  );
+
+  // Use useMemo to fix dependency warnings
+  const metricLabels = useMemo(
+    () => ({
+      clarity: "Clarity",
+      coherence: "Coherence",
+      delivery: "Delivery",
+      vocabulary: "Vocabulary",
+      overallImpact: "Overall Impact",
+      fluency: "Fluency",
+      engagement: "Engagement",
+    }),
+    []
+  );
+
+  // Use useMemo to fix dependency warnings
+  const availableMetrics = useMemo(
+    () => [
+      "clarity",
+      "coherence",
+      "delivery",
+      "vocabulary",
+      "overallImpact",
+      "fluency",
+      "engagement",
+    ],
+    []
+  );
 
   useEffect(() => {
     if (!evaluations || !evaluations.length) return;
+
+    // Set active timeframe when prop changes
+    setActiveTimeframe(timeframe);
 
     // Sort evaluations by date
     const sortedEvals = [...evaluations].sort(
@@ -105,29 +141,12 @@ const ProgressChart = ({
       chart: {
         type: "line",
         toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-          },
+          show: false, // Hide toolbar for a cleaner look
         },
         animations: {
           enabled: true,
-          easing: "easeinout",
           speed: 800,
-          animateGradually: {
-            enabled: true,
-            delay: 150,
-          },
-          dynamicAnimation: {
-            enabled: true,
-            speed: 350,
-          },
+          // Remove easing property as it doesn't exist in the type definition
         },
       },
       stroke: {
@@ -138,11 +157,11 @@ const ProgressChart = ({
         enabled: false,
       },
       markers: {
-        size: 5,
+        size: 4,
         hover: {
-          size: 7,
+          size: 6,
         },
-        // Remove the width property that's causing the error
+        // Remove height property as it doesn't exist in the type definition
       },
       tooltip: {
         theme: "dark",
@@ -158,25 +177,11 @@ const ProgressChart = ({
             fontFamily: "inherit",
           },
         },
-        title: {
-          text: "Date",
-          style: {
-            fontSize: "14px",
-            fontWeight: 500,
-          },
-        },
       },
       yaxis: {
         min: 0,
         max: 10,
         tickAmount: 5,
-        title: {
-          text: "Score (0-10)",
-          style: {
-            fontSize: "14px",
-            fontWeight: 500,
-          },
-        },
         labels: {
           formatter: (value: number) => value.toFixed(0),
         },
@@ -199,10 +204,9 @@ const ProgressChart = ({
         position: "top",
         horizontalAlign: "center",
         fontSize: "14px",
-        // Remove the width property from markers
         markers: {
-          height: 12,
-          radius: 12,
+          radius: 8,
+          // Remove height property
         },
         itemMargin: {
           horizontal: 10,
@@ -223,51 +227,170 @@ const ProgressChart = ({
 
   if (!chartData || evaluations.length === 0) {
     return (
-      <div className="w-full shadow-lg bg-white rounded-lg">
-        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-          <p className="text-gray-500 font-medium text-lg">No data available</p>
+      <div className="max-w-full w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg dark:bg-gray-700">
+          <p className="text-gray-500 font-medium text-lg dark:text-gray-400">
+            No data available
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full shadow-lg bg-white rounded-lg">
-      <div className="flex flex-col gap-4 rounded-none md:flex-row md:items-center px-6 py-4 border-b">
-        <div className="w-12 h-12 rounded-lg bg-blue-600 p-3 text-white flex items-center justify-center">
-          <ChartBarIcon className="h-6 w-6" />
+    <div className="max-w-full w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
+      <div className="flex justify-between mb-5">
+        <div className="grid gap-4 grid-cols-2">
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Clarity
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Clarity Score
+                    </h3>
+                    <p>How clearly the speech's message was communicated.</p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.clarity}/10
+            </p>
+          </div>
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Overall Impact
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Overall Impact
+                    </h3>
+                    <p>The combined effectiveness and impact of the speech.</p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.overallImpact}/10
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">
-            Speech Evaluation Progress
-          </h3>
-          <p className="text-sm text-gray-600">
-            {allMetrics ? (
-              "Tracking all speaking metrics over time"
-            ) : (
-              <>
-                Track your improvements in{" "}
-                {selectedMetrics.length === 1
-                  ? metricLabels[
-                      selectedMetrics[0] as keyof typeof metricLabels
-                    ]
-                  : "multiple speaking metrics"}{" "}
-                over time
-              </>
-            )}
-          </p>
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            type="button"
+            className="px-3 py-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          >
+            {timeframe === "week"
+              ? "Last week"
+              : timeframe === "month"
+              ? "Last month"
+              : timeframe === "year"
+              ? "Last year"
+              : "All time"}
+            <svg
+              className="w-2.5 h-2.5 ms-2.5"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="m1 1 4 4 4-4"
+              />
+            </svg>
+          </button>
+          {dropdownOpen && (
+            <div className="absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 right-0">
+              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                <li>
+                  <button
+                    onClick={() => {
+                      setActiveTimeframe("all");
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    All time
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setActiveTimeframe("week");
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    Last 7 days
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setActiveTimeframe("month");
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    Last 30 days
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      setActiveTimeframe("year");
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >
+                    Last 90 days
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
-      <div className="px-4 pb-4 pt-0">
-        <div className="h-[400px]">
-          {chartData && (
-            <Chart
-              options={chartData.options}
-              series={chartData.series}
-              type="line"
-              height="100%"
-            />
-          )}
+
+      <div className="h-64">
+        {chartData && (
+          <Chart
+            options={chartData.options}
+            series={chartData.series}
+            type="line"
+            height="100%"
+          />
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between mt-2.5">
+        <div className="pt-5">
+          <a
+            href="/progresstracking"
+            className="px-5 py-2.5 text-sm font-medium text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            <svg
+              className="w-3.5 h-3.5 text-white me-2 rtl:rotate-180"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 16 20"
+            >
+              <path d="M14.066 0H7v5a2 2 0 0 1-2 2H0v11a1.97 1.97 0 0 0 1.934 2h12.132A1.97 1.97 0 0 0 16 18V2a1.97 1.97 0 0 0-1.934-2Zm-3 15H4.828a1 1 0 0 1 0-2h6.238a1 1 0 0 1 0 2Zm0-4H4.828a1 1 0 0 1 0-2h6.238a1 1 0 1 1 0 2Z" />
+              <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.98 2.98 0 0 0 .13 5H5Z" />
+            </svg>
+            View full report
+          </a>
         </div>
       </div>
     </div>
