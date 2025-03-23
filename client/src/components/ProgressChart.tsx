@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
-import { ChartBarIcon } from "@heroicons/react/24/outline/ChartBarIcon.js";
 import { ApexOptions } from "apexcharts";
-import { InformationCircleIcon } from "@heroicons/react/24/outline/InformationCircleIcon.js";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 // Define type for chart data to avoid 'any'
 interface ChartDataType {
@@ -48,10 +47,11 @@ const ProgressChart = ({
     if (!evaluations || !evaluations.length) return {};
 
     const totals = evaluations.reduce(
-      (acc, eval) => {
+      (acc, evaluation) => {
         return {
-          clarity: acc.clarity + (eval.scores.clarity || 0),
-          overallImpact: acc.overallImpact + (eval.scores.overallImpact || 0),
+          clarity: acc.clarity + (evaluation.scores.clarity || 0),
+          overallImpact:
+            acc.overallImpact + (evaluation.scores.overallImpact || 0),
         };
       },
       { clarity: 0, overallImpact: 0 }
@@ -65,41 +65,53 @@ const ProgressChart = ({
 
   const averages = calculateAverages();
 
-  // Define color palette for metrics
-  const metricColors = {
-    clarity: "#3b82f6", // blue-500
-    coherence: "#ef4444", // red-500
-    delivery: "#10b981", // emerald-500
-    vocabulary: "#f97316", // orange-500
-    overallImpact: "#8b5cf6", // violet-500
-    fluency: "#eab308", // yellow-500
-    engagement: "#6b7280", // gray-500
-  };
+  // Use useMemo to fix dependency warnings
+  const metricColors = useMemo(
+    () => ({
+      clarity: "#3b82f6", // blue-500
+      coherence: "#ef4444", // red-500
+      delivery: "#10b981", // emerald-500
+      vocabulary: "#f97316", // orange-500
+      overallImpact: "#8b5cf6", // violet-500
+      fluency: "#eab308", // yellow-500
+      engagement: "#6b7280", // gray-500
+    }),
+    []
+  );
 
-  // Define labels for metrics
-  const metricLabels = {
-    clarity: "Clarity",
-    coherence: "Coherence",
-    delivery: "Delivery",
-    vocabulary: "Vocabulary",
-    overallImpact: "Overall Impact",
-    fluency: "Fluency",
-    engagement: "Engagement",
-  };
+  // Use useMemo to fix dependency warnings
+  const metricLabels = useMemo(
+    () => ({
+      clarity: "Clarity",
+      coherence: "Coherence",
+      delivery: "Delivery",
+      vocabulary: "Vocabulary",
+      overallImpact: "Overall Impact",
+      fluency: "Fluency",
+      engagement: "Engagement",
+    }),
+    []
+  );
 
-  // Define all available metrics
-  const availableMetrics = [
-    "clarity",
-    "coherence",
-    "delivery",
-    "vocabulary",
-    "overallImpact",
-    "fluency",
-    "engagement",
-  ];
+  // Use useMemo to fix dependency warnings
+  const availableMetrics = useMemo(
+    () => [
+      "clarity",
+      "coherence",
+      "delivery",
+      "vocabulary",
+      "overallImpact",
+      "fluency",
+      "engagement",
+    ],
+    []
+  );
 
   useEffect(() => {
     if (!evaluations || !evaluations.length) return;
+
+    // Set active timeframe when prop changes
+    setActiveTimeframe(timeframe);
 
     // Sort evaluations by date
     const sortedEvals = [...evaluations].sort(
@@ -133,8 +145,8 @@ const ProgressChart = ({
         },
         animations: {
           enabled: true,
-          easing: "easeinout",
           speed: 800,
+          // Remove easing property as it doesn't exist in the type definition
         },
       },
       stroke: {
@@ -149,6 +161,7 @@ const ProgressChart = ({
         hover: {
           size: 6,
         },
+        // Remove height property as it doesn't exist in the type definition
       },
       tooltip: {
         theme: "dark",
@@ -192,8 +205,8 @@ const ProgressChart = ({
         horizontalAlign: "center",
         fontSize: "14px",
         markers: {
-          height: 8,
           radius: 8,
+          // Remove height property
         },
         itemMargin: {
           horizontal: 10,
@@ -231,9 +244,9 @@ const ProgressChart = ({
           <div>
             <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
               Clarity
-              <span className="relative">
+              <span className="relative group">
                 <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
-                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-xs opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0">
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="p-3 space-y-2">
                     <h3 className="font-semibold text-gray-900 dark:text-white">
                       Clarity Score
@@ -250,9 +263,9 @@ const ProgressChart = ({
           <div>
             <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
               Overall Impact
-              <span className="relative">
+              <span className="relative group">
                 <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
-                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-xs opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0">
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="p-3 space-y-2">
                     <h3 className="font-semibold text-gray-900 dark:text-white">
                       Overall Impact
