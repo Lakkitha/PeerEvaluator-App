@@ -436,3 +436,63 @@ export async function getAllClubAdmins() {
     ...(doc.data() as ClubAdmin),
   }));
 }
+
+// Add these functions to your firebase.ts file
+
+export async function getClubMembers(clubId: string) {
+  // Verify current user is a club admin
+  const admin = await getCurrentClubAdmin();
+  if (admin.clubID !== clubId) {
+    throw new Error("You can only view members from your own club");
+  }
+
+  // Get all users that belong to this club and are verified
+  const usersQuery = query(
+    collection(db, "users"),
+    where("clubID", "==", clubId),
+    where("isVerified", "==", true)
+  );
+
+  const querySnapshot = await getDocs(usersQuery);
+
+  // For each user, get their evaluation count
+  const memberPromises = querySnapshot.docs.map(async (doc) => {
+    const userData = doc.data();
+
+    // Count evaluations
+    const evaluationsQuery = query(
+      collection(db, "evaluations"),
+      where("userId", "==", doc.id)
+    );
+    const evaluationSnapshot = await getDocs(evaluationsQuery);
+
+    return {
+      id: doc.id,
+      username: userData.username || "Unknown User",
+      email: userData.email,
+      isVerified: userData.isVerified,
+      joinedDate: userData.createdAt,
+      evaluationCount: evaluationSnapshot.size,
+    };
+  });
+
+  return Promise.all(memberPromises);
+}
+
+export async function getUserDetails(userId: string) {
+  // Get the user document
+  const userDoc = await getDoc(doc(db, "users", userId));
+
+  if (!userDoc.exists()) {
+    throw new Error("User not found");
+  }
+
+  const userData = userDoc.data();
+  return {
+    username: userData.username,
+    email: userData.email,
+    clubID: userData.clubID,
+    isVerified: userData.isVerified,
+    joinedDate: userData.createdAt,
+  };
+}

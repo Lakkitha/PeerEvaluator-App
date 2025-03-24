@@ -10,9 +10,9 @@ import ProgressTracker from "./pages/ProgressTracker";
 import ClubAdminDashboard from "./pages/ClubAdminDashboard";
 import WebAdminDashboard from "./pages/WebAdminDashboard";
 import DbInitializer from "./pages/DbInitializer";
-// Update these import statements to match your file names
 import ClubAdminLogin from "./pages/ClubAdminLogin";
 import ClubAdminSignUp from "./pages/ClubAdminSignUp";
+import MemberProgressView from "./pages/MemberProgressView";
 // Add this new import
 import WebAdminLogin from "./pages/WebAdminLogin";
 import WebAdminSignup from "./pages/WebAdminSignup";
@@ -71,6 +71,10 @@ function App() {
           {/* Club Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin/dashboard" element={<ClubAdminDashboard />} />
+            <Route
+              path="/admin/member-progress/:userId"
+              element={<MemberProgressView />}
+            />
           </Route>
 
           {/* 404 Route */}
