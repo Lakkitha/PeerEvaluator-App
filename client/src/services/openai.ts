@@ -40,12 +40,12 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
     // Create a form data object
     const formData = new FormData();
     formData.append("file", audioBlob, "recording.webm");
-    formData.append("model", "whisper-1");
+    formData.append("model", "gpt-4o-mini-transcribe");
 
     // Make the API call
     const transcription = await openai.audio.transcriptions.create({
       file: new File([audioBlob], "recording.webm", { type: fileType }),
-      model: "whisper-1",
+      model: "gpt-4o-mini-transcribe",
     });
 
     console.log("Transcription successful:", transcription);
