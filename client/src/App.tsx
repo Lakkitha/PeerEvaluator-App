@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastProvider } from "./context/ToastContext";
 
 // Page Imports
 import Home from "./pages/Home";
@@ -26,38 +27,42 @@ import RoleSelector from "./components/RoleSelector";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
 
-          {/* Role Selection Routes */}
-          <Route
-            path="/role-select/login"
-            element={<RoleSelector mode="login" />}
-          />
-          <Route
-            path="/role-select/signup"
-            element={<RoleSelector mode="signup" />}
-          />
+            {/* Role Selection Routes */}
+            <Route
+              path="/role-select/login"
+              element={<RoleSelector mode="login" />}
+            />
+            <Route
+              path="/role-select/signup"
+              element={<RoleSelector mode="signup" />}
+            />
 
-          {/* Regular Login/Signup Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+            {/* Regular Login/Signup Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
 
-          {/* Admin Login/Signup Routes */}
-          <Route path="/admin/login" element={<ClubAdminLogin />} />
-          <Route path="/admin/signup" element={<ClubAdminSignUp />} />
+            {/* Admin Login/Signup Routes */}
+            <Route path="/admin/login" element={<ClubAdminLogin />} />
+            <Route path="/admin/signup" element={<ClubAdminSignUp />} />
 
-          {/* Web Admin Routes - Only accessible through direct URL */}
-          <Route path="/web-admin" element={<WebAdminLogin />} />
-          <Route path="/web-admin/signup" element={<WebAdminSignup />} />
-          <Route element={<WebAdminRoute />}>
-            <Route path="/webadmin/dashboard" element={<WebAdminDashboard />} />
-          </Route>
+            {/* Web Admin Routes - Only accessible through direct URL */}
+            <Route path="/web-admin" element={<WebAdminLogin />} />
+            <Route path="/web-admin/signup" element={<WebAdminSignup />} />
+            <Route element={<WebAdminRoute />}>
+              <Route
+                path="/webadmin/dashboard"
+                element={<WebAdminDashboard />}
+              />
+            </Route>
 
-          <Route path="/init" element={<DbInitializer />} />
+            <Route path="/init" element={<DbInitializer />} />
 
           {/* Protected User Routes */}
           <Route element={<PrivateRoute />}>
@@ -67,7 +72,7 @@ function App() {
             <Route path="/evaluation/:evaluationId" element={<EvaluationDetails />} />
             {/* <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} /> */}
-          </Route>
+            </Route>
 
           {/* Club Admin Routes */}
           <Route element={<AdminRoute />}>
@@ -78,11 +83,12 @@ function App() {
             />
           </Route>
 
-          {/* 404 Route */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 
