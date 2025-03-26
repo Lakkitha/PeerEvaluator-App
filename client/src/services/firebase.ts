@@ -10,6 +10,8 @@ import {
   setDoc,
   addDoc,
   orderBy,
+  deleteDoc,
+  writeBatch,
 } from "firebase/firestore";
 import {
   User,
@@ -495,4 +497,82 @@ export async function getUserDetails(userId: string) {
     isVerified: userData.isVerified,
     joinedDate: userData.createdAt,
   };
+}
+
+// Add this function to your services/firebase.ts file
+
+export async function deleteClub(clubId: string) {
+  if (!auth.currentUser) {
+    throw new Error("You must be logged in to delete a club");
+  }
+
+  // Check if the current user is a web admin
+  const isAdmin = await isCurrentUserWebAdmin();
+  if (!isAdmin) {
+    throw new Error("Only web administrators can delete clubs");
+  }
+
+  try {
+    // Check if club exists
+    const clubDoc = await getDoc(doc(db, "clubs", clubId));
+    if (!clubDoc.exists()) {
+      throw new Error("Club not found");
+    }
+
+    const clubData = clubDoc.data();
+
+    // Step 1: Update related club admin document if exists
+    if (clubData.clubAdminID) {
+      try {
+        await updateDoc(doc(db, "Club_Admins", clubData.clubAdminID), {
+          clubID: "",
+          updatedAt: new Date().toISOString(),
+        });
+        console.log(`Updated club admin ${clubData.clubAdminID}`);
+      } catch (adminError) {
+        console.error("Error updating club admin:", adminError);
+        // Continue with deletion process even if updating admin fails
+      }
+    }
+
+    // We'll use Cloud Functions or admin endpoints to handle evaluation updates
+    // for now, just proceed with club deletion
+
+    // Step 2: Find all users associated with this club and update them
+    try {
+      const usersQuery = query(
+        collection(db, "users"),
+        where("clubID", "==", clubId)
+      );
+
+      const userSnapshots = await getDocs(usersQuery);
+
+      if (userSnapshots.size > 0) {
+        const userBatch = writeBatch(db);
+
+        userSnapshots.forEach((userDoc) => {
+          userBatch.update(doc(db, "users", userDoc.id), {
+            clubID: "",
+            isVerified: false,
+            updatedAt: new Date().toISOString(),
+          });
+        });
+
+        await userBatch.commit();
+        console.log(`Updated ${userSnapshots.size} users`);
+      }
+    } catch (userError) {
+      console.error("Error updating users:", userError);
+      // Continue even if this fails, as we will still delete the club
+    }
+
+    // Step 3: Finally delete the club document
+    await deleteDoc(doc(db, "clubs", clubId));
+    console.log(`Deleted club ${clubId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting club:", error);
+    throw error;
+  }
 }
