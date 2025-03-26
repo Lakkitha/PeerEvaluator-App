@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../firebase";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  isCurrentUserClubAdmin,
+  getEvaluationsForUser,
+  getUserDetails,
+} from "../services/firebase";
 import ProgressChart from "../components/ProgressChart";
-import { useNavigate } from "react-router-dom";
 
 interface EvaluationData {
   id: string;
@@ -20,13 +23,22 @@ interface EvaluationData {
   feedback: string;
 }
 
-const ProgressTracker = () => {
-  const [evaluations, setEvaluations] = useState<EvaluationData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface UserDetails {
+  username: string;
+  email: string;
+  clubID: string;
+  isVerified: boolean;
+  joinedDate: string;
+}
+
+const MemberProgressView = () => {
+  const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
-  // Use array for multiple metrics selection
+  const [evaluations, setEvaluations] = useState<EvaluationData[]>([]);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([
     "overallImpact",
   ]);
@@ -34,55 +46,54 @@ const ProgressTracker = () => {
   const [showAllMetrics, setShowAllMetrics] = useState(false);
 
   useEffect(() => {
-    const fetchEvaluations = async () => {
-      if (!auth.currentUser) {
-        setError("You must be logged in to view your progress");
-        setLoading(false);
-        return;
-      }
-
+    async function checkPermissionsAndLoadData() {
       try {
-        const userId = auth.currentUser.uid;
-        const evaluationsRef = collection(db, "evaluations");
-        const userEvaluationsQuery = query(
-          evaluationsRef,
-          where("userId", "==", userId),
-          orderBy("date", "asc")
-        );
+        // Verify that current user is a club admin
+        const isAdmin = await isCurrentUserClubAdmin();
+        if (!isAdmin) {
+          navigate("/home");
+          return;
+        }
 
-        const querySnapshot = await getDocs(userEvaluationsQuery);
-        const evaluationsData: EvaluationData[] = [];
+        if (!userId) {
+          setError("User ID is missing");
+          setLoading(false);
+          return;
+        }
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          evaluationsData.push({
-            id: doc.id,
-            date: data.date,
-            transcript: data.transcript,
-            scores: {
-              clarity: data.scores.clarity || 0,
-              coherence: data.scores.coherence || 0,
-              delivery: data.scores.delivery || 0,
-              vocabulary: data.scores.vocabulary || 0,
-              overallImpact: data.scores.overallImpact || 0,
-              fluency: data.scores.fluency || 0,
-              engagement: data.scores.engagement || 0,
-            },
-            feedback: data.feedback,
-          });
-        });
+        // Get user details
+        const details = await getUserDetails(userId);
+        setUserDetails(details);
 
+        // Get user's evaluations
+        const evaluationsData = await getEvaluationsForUser(userId);
         setEvaluations(evaluationsData);
       } catch (err) {
-        setError("Failed to load evaluation data");
-        console.error("Error fetching evaluations:", err);
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchEvaluations();
-  }, []);
+    checkPermissionsAndLoadData();
+  }, [userId, navigate]);
+
+  const toggleMetric = (metric: string) => {
+    setSelectedMetrics((prev) =>
+      prev.includes(metric)
+        ? prev.filter((m) => m !== metric)
+        : [...prev, metric]
+    );
+  };
+
+  const toggleAllMetrics = () => {
+    setShowAllMetrics((prev) => !prev);
+    if (!showAllMetrics) {
+      setSelectedMetrics([]);
+    } else {
+      setSelectedMetrics(["overallImpact"]);
+    }
+  };
 
   const filteredEvaluations = () => {
     if (timeframe === "all") return evaluations;
@@ -150,28 +161,6 @@ const ProgressTracker = () => {
     };
   };
 
-  // Method to toggle metrics selection
-  const toggleMetric = (metric: string) => {
-    setSelectedMetrics((prev) =>
-      prev.includes(metric)
-        ? prev.filter((m) => m !== metric)
-        : [...prev, metric]
-    );
-  };
-
-  // Add a function to handle toggling the "All" option
-  const toggleAllMetrics = () => {
-    setShowAllMetrics((prev) => !prev);
-    // If turning on "All", we clear individual selections
-    if (!showAllMetrics) {
-      setSelectedMetrics([]);
-    }
-    // If turning off "All", we default to overall impact
-    else {
-      setSelectedMetrics(["overallImpact"]);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -180,37 +169,70 @@ const ProgressTracker = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {error}
-      </div>
-    );
-  }
-
   const averages = calculateAverages();
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">
-        Your Speaking Progress
-      </h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">
+          Member Progress: {userDetails?.username || "Unknown"}
+        </h1>
+        <button
+          onClick={() => navigate("/admin/dashboard")}
+          className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-gray-700"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
 
       {evaluations.length === 0 ? (
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
           <h2 className="text-2xl font-semibold mb-4">No Evaluations Yet</h2>
           <p className="mb-4">
-            You haven't recorded any speech evaluations yet.
+            This member hasn't recorded any speech evaluations yet.
           </p>
-          <a
-            href="/evaluate"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-          >
-            Record Your First Speech
-          </a>
         </div>
       ) : (
         <>
+          {/* Member Info Card */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 className="text-xl font-bold mb-4">Member Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Email</p>
+                <p className="font-medium">{userDetails?.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Joined Date</p>
+                <p className="font-medium">
+                  {userDetails?.joinedDate
+                    ? new Date(userDetails.joinedDate).toLocaleDateString()
+                    : "Unknown"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Verification Status</p>
+                <p
+                  className={`font-medium ${
+                    userDetails?.isVerified ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {userDetails?.isVerified ? "Verified" : "Not Verified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Evaluations</p>
+                <p className="font-medium">{evaluations.length}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Controls */}
           <div className="mb-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
@@ -295,51 +317,35 @@ const ProgressTracker = () => {
           <div className="bg-white p-6 rounded-lg shadow-md mb-8">
             <h2 className="text-xl font-bold mb-4">Performance Summary</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Clarity</h3>
-                <p className="text-2xl font-bold">
-                  {averages.clarity.toFixed(1)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Coherence</h3>
-                <p className="text-2xl font-bold">
-                  {averages.coherence.toFixed(1)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Delivery</h3>
-                <p className="text-2xl font-bold">
-                  {averages.delivery.toFixed(1)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">
-                  Vocabulary
-                </h3>
-                <p className="text-2xl font-bold">
-                  {averages.vocabulary.toFixed(1)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Overall</h3>
-                <p className="text-2xl font-bold">
-                  {averages.overallImpact.toFixed(1)}
-                </p>
-              </div>
+              {[
+                { id: "clarity", label: "Clarity" },
+                { id: "coherence", label: "Coherence" },
+                { id: "delivery", label: "Delivery" },
+                { id: "vocabulary", label: "Vocabulary" },
+                { id: "overallImpact", label: "Overall" },
+              ].map((metric) => (
+                <div key={metric.id} className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-500">
+                    {metric.label}
+                  </h3>
+                  <p className="text-2xl font-bold">
+                    {averages[metric.id as keyof typeof averages].toFixed(1)}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Recent Evaluations */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Recent Evaluations</h2>
+            <h2 className="text-xl font-bold mb-4">Evaluation History</h2>
             <div className="space-y-4">
               {filteredEvaluations()
-                .slice(-3)
+                .slice()
                 .reverse()
                 .map((evaluation, index) => (
                   <div
-                    key={index}
+                    key={evaluation.id}
                     className="border border-gray-200 rounded-lg p-4"
                   >
                     <div className="flex justify-between items-center mb-2">
@@ -372,4 +378,4 @@ const ProgressTracker = () => {
   );
 };
 
-export default ProgressTracker;
+export default MemberProgressView;

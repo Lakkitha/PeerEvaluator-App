@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   isCurrentUserClubAdmin,
   getCurrentClubAdmin,
@@ -7,6 +7,7 @@ import {
   verifyUser,
   getEvaluationsForClub,
   getClubById,
+  getClubMembers,
 } from "../services/firebase";
 
 interface UnverifiedUser {
@@ -26,6 +27,15 @@ interface ClubEvaluation {
   };
 }
 
+interface ClubMember {
+  id: string;
+  username: string;
+  email: string;
+  isVerified: boolean;
+  joinedDate: string;
+  evaluationCount: number;
+}
+
 const ClubAdminDashboard = () => {
   const [unverifiedUsers, setUnverifiedUsers] = useState<UnverifiedUser[]>([]);
   const [clubData, setClubData] = useState<{ id: string; name: string } | null>(
@@ -34,6 +44,7 @@ const ClubAdminDashboard = () => {
   const [recentEvaluations, setRecentEvaluations] = useState<ClubEvaluation[]>(
     []
   );
+  const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -74,6 +85,12 @@ const ClubAdminDashboard = () => {
             },
           }))
         );
+
+        // Get club members
+        if (adminData.clubID) {
+          const members = await getClubMembers(adminData.clubID);
+          setClubMembers(members);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -177,6 +194,65 @@ const ClubAdminDashboard = () => {
                         >
                           Reject
                         </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Club Members Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4">Club Members</h2>
+
+          {clubMembers.length === 0 ? (
+            <p className="text-gray-600">No members in your club yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Joined Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Evaluations
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {clubMembers.map((member) => (
+                    <tr key={member.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {member.username}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {member.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {new Date(member.joinedDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {member.evaluationCount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link
+                          to={`/admin/member-progress/${member.id}`}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          View Progress
+                        </Link>
                       </td>
                     </tr>
                   ))}
