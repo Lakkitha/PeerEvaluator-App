@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ToastProvider } from "./context/ToastContext";
+// import { ToastProvider } from "./context/ToastContext";
 
 // Page Imports
 import Home from "./pages/Home";
@@ -27,7 +27,7 @@ import RoleSelector from "./components/RoleSelector";
 
 function App() {
   return (
-    <ToastProvider>
+    // <ToastProvider>
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
@@ -83,7 +83,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </ToastProvider>
+    // </ToastProvider>
   );
 }
 
