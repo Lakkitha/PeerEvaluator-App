@@ -10,10 +10,10 @@ import ProgressTracker from "./pages/ProgressTracker";
 import ClubAdminDashboard from "./pages/ClubAdminDashboard";
 import WebAdminDashboard from "./pages/WebAdminDashboard";
 import DbInitializer from "./pages/DbInitializer";
-// Update these import statements to match your file names
 import ClubAdminLogin from "./pages/ClubAdminLogin";
 import ClubAdminSignUp from "./pages/ClubAdminSignUp";
-// Add this new import
+import MemberProgressView from "./pages/MemberProgressView";
+import EvaluationDetails from "./pages/EvaluationDetails";
 import WebAdminLogin from "./pages/WebAdminLogin";
 import WebAdminSignup from "./pages/WebAdminSignup";
 
@@ -64,6 +64,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/evaluate" element={<SpeechEvaluation />} />
             <Route path="/progress" element={<ProgressTracker />} />
+            <Route path="/evaluation/:evaluationId" element={<EvaluationDetails />} />
             {/* <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} /> */}
           </Route>
@@ -71,6 +72,10 @@ function App() {
           {/* Club Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin/dashboard" element={<ClubAdminDashboard />} />
+            <Route
+              path="/admin/member-progress/:userId"
+              element={<MemberProgressView />}
+            />
           </Route>
 
           {/* 404 Route */}

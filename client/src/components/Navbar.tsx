@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 import { auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -17,6 +17,15 @@ const Navbar = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
+
+  // Function to determine if a nav item is active
+  const isActive = (path: string) => {
+    if (path === "/home" && location.pathname === "/") {
+      return true; // Consider home active when on root path
+    }
+    return location.pathname.startsWith(path);
+  };
 
   // Monitor authentication state and check admin status
   useEffect(() => {
@@ -114,8 +123,12 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/home"
-                  className="block py-2 px-3 text-center text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500"
-                  aria-current="page"
+                  className={`block py-2 px-3 text-center rounded md:p-0 ${
+                    isActive("/home")
+                      ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                      : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  }`}
+                  aria-current={isActive("/home") ? "page" : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Home
@@ -124,7 +137,12 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/evaluate"
-                  className="block py-2 px-3 text-center text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
+                  className={`block py-2 px-3 text-center rounded md:p-0 ${
+                    isActive("/evaluate")
+                      ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                      : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  }`}
+                  aria-current={isActive("/evaluate") ? "page" : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Evaluation
@@ -133,7 +151,12 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/dashboard"
-                  className="block py-2 px-3 text-center text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
+                  className={`block py-2 px-3 text-center rounded md:p-0 ${
+                    isActive("/dashboard")
+                      ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                      : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  }`}
+                  aria-current={isActive("/dashboard") ? "page" : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
@@ -142,7 +165,12 @@ const Navbar = () => {
               <li>
                 <Link
                   to="/progress"
-                  className="block py-2 px-3 text-center text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
+                  className={`block py-2 px-3 text-center rounded md:p-0 ${
+                    isActive("/progress")
+                      ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                      : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  }`}
+                  aria-current={isActive("/progress") ? "page" : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Progress
