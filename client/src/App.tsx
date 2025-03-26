@@ -13,7 +13,7 @@ import DbInitializer from "./pages/DbInitializer";
 import ClubAdminLogin from "./pages/ClubAdminLogin";
 import ClubAdminSignUp from "./pages/ClubAdminSignUp";
 import MemberProgressView from "./pages/MemberProgressView";
-// Add this new import
+import EvaluationDetails from "./pages/EvaluationDetails";
 import WebAdminLogin from "./pages/WebAdminLogin";
 import WebAdminSignup from "./pages/WebAdminSignup";
 
@@ -64,6 +64,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/evaluate" element={<SpeechEvaluation />} />
             <Route path="/progress" element={<ProgressTracker />} />
+            <Route path="/evaluation/:evaluationId" element={<EvaluationDetails />} />
             {/* <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} /> */}
           </Route>

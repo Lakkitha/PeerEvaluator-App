@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import ProgressChart from "../components/ProgressChart";
+import { useNavigate } from "react-router-dom";
 
 interface EvaluationData {
   id: string;
@@ -23,6 +24,7 @@ const ProgressTracker = () => {
   const [evaluations, setEvaluations] = useState<EvaluationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Use array for multiple metrics selection
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([
@@ -353,7 +355,10 @@ const ProgressTracker = () => {
                       {evaluation.transcript}
                     </p>
                     <div className="mt-2">
-                      <button className="text-blue-600 text-sm font-medium hover:text-blue-800">
+                      <button
+                        onClick={() => navigate(`/evaluation/${evaluation.id}`)}
+                        className="text-blue-600 text-sm font-medium hover:text-blue-800"
+                      >
                         View Details
                       </button>
                     </div>
