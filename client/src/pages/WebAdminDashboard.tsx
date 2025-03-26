@@ -6,6 +6,7 @@ import {
   createClubAdmin,
   createClub,
   getAllClubAdmins,
+  deleteClub, // Import the new function
 } from "../services/firebase";
 import { useToast } from "../context/ToastContext";
 
@@ -31,6 +32,7 @@ const WebAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [creatingClub, setCreatingClub] = useState(false); // Add this for club creation
   const [creatingAdmin, setCreatingAdmin] = useState(false); // Add this for admin creation
+  const [deletingClub, setDeletingClub] = useState<string | null>(null); // Track which club is being deleted
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("clubs"); // 'clubs' or 'admins'
   const [formData, setFormData] = useState({
@@ -132,6 +134,51 @@ const WebAdminDashboard = () => {
     }
   };
 
+  const handleDeleteClub = async (clubId: string) => {
+    // Ask for confirmation before deleting
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this club? All members will be unverified and admins unlinked."
+      )
+    ) {
+      return;
+    }
+
+    setDeletingClub(clubId);
+    try {
+      setError("");
+      await deleteClub(clubId);
+      await loadAllData(); // Refresh data after deletion
+      showToast("Club deleted successfully", "success");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete club";
+      console.error("Delete club error:", err);
+
+      // Check for specific error types
+      if (
+        err instanceof Error &&
+        err.message.includes("Missing or insufficient permissions")
+      ) {
+        setError(
+          "Permission error: Some related data couldn't be updated, but the club was deleted successfully."
+        );
+        showToast(
+          "Club deleted, but with some warnings. Check console for details.",
+          "warning"
+        );
+
+        // Try to reload the data anyway since the club might have been deleted
+        await loadAllData();
+      } else {
+        setError(errorMessage);
+        showToast(errorMessage, "error");
+      }
+    } finally {
+      setDeletingClub(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -197,6 +244,9 @@ const WebAdminDashboard = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Created
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -218,6 +268,45 @@ const WebAdminDashboard = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {new Date(club.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => handleDeleteClub(club.id)}
+                            disabled={deletingClub === club.id}
+                            className={`text-red-600 hover:text-red-900 ${
+                              deletingClub === club.id
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                          >
+                            {deletingClub === club.id ? (
+                              <span className="flex items-center">
+                                <svg
+                                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-red-600"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
+                                </svg>
+                                Deleting...
+                              </span>
+                            ) : (
+                              "Delete"
+                            )}
+                          </button>
                         </td>
                       </tr>
                     ))}
