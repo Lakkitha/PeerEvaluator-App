@@ -7,6 +7,7 @@ import {
   createClub,
   getAllClubAdmins,
 } from "../services/firebase";
+import { useToast } from "../context/ToastContext";
 
 interface Club {
   id: string;
@@ -40,6 +41,7 @@ const WebAdminDashboard = () => {
   });
   const [newClubName, setNewClubName] = useState("");
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     async function checkAdminAndLoadData() {
@@ -94,11 +96,12 @@ const WebAdminDashboard = () => {
         clubID: "",
       });
       await loadAllData(); // Refresh data
-      alert("Club admin created successfully!");
+      showToast("Club administrator created successfully!", "success");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create club admin"
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create club admin";
+      setError(errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setCreatingAdmin(false); // Set loading state back to false
     }
@@ -108,6 +111,7 @@ const WebAdminDashboard = () => {
     e.preventDefault();
     if (!newClubName.trim()) {
       setError("Please enter a club name");
+      showToast("Please enter a club name", "warning");
       return;
     }
 
@@ -117,9 +121,12 @@ const WebAdminDashboard = () => {
       await createClub(newClubName.trim());
       setNewClubName("");
       await loadAllData(); // Refresh data
-      alert("Club created successfully!");
+      showToast("Club created successfully!", "success");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create club");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create club";
+      setError(errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setCreatingClub(false); // Set loading state back to false
     }
