@@ -28,6 +28,8 @@ const WebAdminDashboard = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [ClubAdmins, setClubAdmins] = useState<ClubAdmin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creatingClub, setCreatingClub] = useState(false); // Add this for club creation
+  const [creatingAdmin, setCreatingAdmin] = useState(false); // Add this for admin creation
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("clubs"); // 'clubs' or 'admins'
   const [formData, setFormData] = useState({
@@ -81,6 +83,7 @@ const WebAdminDashboard = () => {
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCreatingAdmin(true); // Set loading state to true
     try {
       setError("");
       await createClubAdmin(formData);
@@ -96,6 +99,8 @@ const WebAdminDashboard = () => {
       setError(
         err instanceof Error ? err.message : "Failed to create club admin"
       );
+    } finally {
+      setCreatingAdmin(false); // Set loading state back to false
     }
   };
 
@@ -106,6 +111,7 @@ const WebAdminDashboard = () => {
       return;
     }
 
+    setCreatingClub(true); // Set loading state to true
     try {
       setError("");
       await createClub(newClubName.trim());
@@ -114,6 +120,8 @@ const WebAdminDashboard = () => {
       alert("Club created successfully!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create club");
+    } finally {
+      setCreatingClub(false); // Set loading state back to false
     }
   };
 
@@ -226,14 +234,44 @@ const WebAdminDashboard = () => {
                   onChange={(e) => setNewClubName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
+                  disabled={creatingClub} // Disable input while creating
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                disabled={creatingClub} // Disable button while creating
+                className={`w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center ${
+                  creatingClub ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               >
-                Create Club
+                {creatingClub ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Creating...
+                  </>
+                ) : (
+                  "Create Club"
+                )}
               </button>
             </form>
           </div>
@@ -299,6 +337,7 @@ const WebAdminDashboard = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
+                  disabled={creatingAdmin} // Disable input while creating
                 />
               </div>
 
@@ -313,6 +352,7 @@ const WebAdminDashboard = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
+                  disabled={creatingAdmin} // Disable input while creating
                 />
               </div>
 
@@ -327,6 +367,7 @@ const WebAdminDashboard = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
+                  disabled={creatingAdmin} // Disable input while creating
                 />
               </div>
 
@@ -340,6 +381,7 @@ const WebAdminDashboard = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
+                  disabled={creatingAdmin} // Disable input while creating
                 >
                   <option value="">Select a club</option>
                   {clubs
@@ -354,9 +396,38 @@ const WebAdminDashboard = () => {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                disabled={creatingAdmin} // Disable button while creating
+                className={`w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center ${
+                  creatingAdmin ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               >
-                Create Admin
+                {creatingAdmin ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Creating...
+                  </>
+                ) : (
+                  "Create Admin"
+                )}
               </button>
             </form>
           </div>
