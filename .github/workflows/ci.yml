@@ -1,0 +1,46 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      
+      - name: Install Client Dependencies
+        working-directory: ./client
+        run: npm ci
+      
+      - name: Lint Client
+        working-directory: ./client
+        run: npm run lint
+        
+      - name: Build Client
+        working-directory: ./client
+        run: npm run build
+        env:
+          VITE_OPEN_AI_API_KEY: ${{ secrets.VITE_OPEN_AI_API_KEY }}
+      
+      - name: Install Functions Dependencies
+        working-directory: ./functions
+        run: npm ci
+      
+      - name: Lint Functions
+        working-directory: ./functions
+        run: npm run lint
+        
+      - name: Build Functions
+        working-directory: ./functions
+        run: npm run build
