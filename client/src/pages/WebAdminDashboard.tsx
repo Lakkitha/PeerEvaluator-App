@@ -6,9 +6,10 @@ import {
   createClubAdmin,
   createClub,
   getAllClubAdmins,
-  deleteClub, // Import the new function
+  deleteClub,
 } from "../services/firebase";
 import { useToast } from "../context/ToastContext";
+import LoadingSkeleton from "../components/LoadingSkeleton"; // Import the LoadingSkeleton
 
 interface Club {
   id: string;
@@ -181,8 +182,49 @@ const WebAdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <LoadingSkeleton
+            type="text"
+            lines={1}
+            height="h-8"
+            className="w-3/4 mx-auto"
+          />
+        </div>
+
+        {/* Tab skeleton */}
+        <div className="flex border-b border-gray-200 mb-6">
+          <div className="py-2 px-4 w-32">
+            <LoadingSkeleton type="custom" lines={1} height="h-6" />
+          </div>
+          <div className="py-2 px-4 w-32">
+            <LoadingSkeleton type="custom" lines={1} height="h-6" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left panel skeleton */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <LoadingSkeleton
+              type="text"
+              lines={1}
+              height="h-6"
+              className="w-48 mb-6"
+            />
+            <LoadingSkeleton type="card" lines={5} className="w-full" />
+          </div>
+
+          {/* Right panel skeleton */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <LoadingSkeleton
+              type="text"
+              lines={1}
+              height="h-6"
+              className="w-48 mb-6"
+            />
+            <LoadingSkeleton type="form" lines={2} className="w-full" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -232,24 +274,24 @@ const WebAdminDashboard = () => {
               <p className="text-gray-600">No clubs registered yet.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Admin Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Created
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {clubs.map((club) => (
                       <tr key={club.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -337,7 +379,7 @@ const WebAdminDashboard = () => {
               <button
                 type="submit"
                 disabled={creatingClub} // Disable button while creating
-                className={`w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center ${
+                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white py-2 px-4 rounded flex justify-center items-center ${
                   creatingClub ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
@@ -381,21 +423,21 @@ const WebAdminDashboard = () => {
               <p className="text-gray-600">No club administrators yet.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Club
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {ClubAdmins.map((admin) => (
                       <tr key={admin.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -493,7 +535,7 @@ const WebAdminDashboard = () => {
               <button
                 type="submit"
                 disabled={creatingAdmin} // Disable button while creating
-                className={`w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center ${
+                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white py-2 px-4 rounded flex justify-center items-center ${
                   creatingAdmin ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
