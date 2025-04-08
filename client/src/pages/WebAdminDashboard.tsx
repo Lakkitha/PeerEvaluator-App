@@ -9,6 +9,7 @@ import {
   deleteClub, // Import the new function
 } from "../services/firebase";
 import { useToast } from "../context/ToastContext";
+import ConfirmModal from "../components/ConfirmModal";
 
 interface Club {
   id: string;
@@ -44,6 +45,11 @@ const WebAdminDashboard = () => {
   const [newClubName, setNewClubName] = useState("");
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [clubToDelete, setClubToDelete] = useState<string | null>(null);
+  const [confirmMessage, setConfirmMessage] = useState(
+    "Are you sure you want to delete this club? All members will be unverified and admins unlinked."
+  );
 
   useEffect(() => {
     async function checkAdminAndLoadData() {
@@ -134,20 +140,23 @@ const WebAdminDashboard = () => {
     }
   };
 
-  const handleDeleteClub = async (clubId: string) => {
-    // Ask for confirmation before deleting
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this club? All members will be unverified and admins unlinked."
-      )
-    ) {
-      return;
-    }
+  const initiateDeleteClub = (clubId: string, clubName: string) => {
+    setClubToDelete(clubId);
+    setConfirmMessage(
+      `Are you sure you want to delete "${clubName}"? All members will be unverified and admins unlinked.`
+    );
+    setConfirmModalOpen(true);
+  };
 
-    setDeletingClub(clubId);
+  const handleDeleteConfirm = async () => {
+    if (!clubToDelete) return;
+
+    setConfirmModalOpen(false);
+    setDeletingClub(clubToDelete);
+
     try {
       setError("");
-      await deleteClub(clubId);
+      await deleteClub(clubToDelete);
       await loadAllData(); // Refresh data after deletion
       showToast("Club deleted successfully", "success");
     } catch (err) {
@@ -176,7 +185,13 @@ const WebAdminDashboard = () => {
       }
     } finally {
       setDeletingClub(null);
+      setClubToDelete(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setConfirmModalOpen(false);
+    setClubToDelete(null);
   };
 
   if (loading) {
@@ -271,7 +286,9 @@ const WebAdminDashboard = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button
-                            onClick={() => handleDeleteClub(club.id)}
+                            onClick={() =>
+                              initiateDeleteClub(club.id, club.clubName)
+                            }
                             disabled={deletingClub === club.id}
                             className={`text-red-600 hover:text-red-900 ${
                               deletingClub === club.id
@@ -529,6 +546,16 @@ const WebAdminDashboard = () => {
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={confirmModalOpen}
+        title="Delete Club"
+        message={confirmMessage}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        icon="warning"
+      />
     </div>
   );
 };
