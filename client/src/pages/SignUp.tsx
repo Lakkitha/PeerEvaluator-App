@@ -124,14 +124,14 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        <h1 className="text-3xl font-bold text-center text-blue-600 dark:text-blue-400 mb-6">
           {pageTitle}
         </h1>
 
         {error && (
           <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+            className="bg-red-100 border border-red-400 text-red-700 dark:bg-red-900 dark:border-red-700 dark:text-red-300 px-4 py-3 rounded mb-4"
             role="alert"
           >
             <span className="block sm:inline">{error}</span>
@@ -142,7 +142,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Full Name
             </label>
@@ -151,7 +151,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
@@ -159,7 +159,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Email
             </label>
@@ -168,7 +168,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
@@ -176,7 +176,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
           <div>
             <label
               htmlFor="club"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Select Club
             </label>
@@ -184,7 +184,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
               id="club"
               value={selectedClub}
               onChange={(e) => setSelectedClub(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               required
             >
               <option value="">Select a club</option>
@@ -199,7 +199,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Password
             </label>
@@ -208,7 +208,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
@@ -216,7 +216,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Confirm Password
             </label>
@@ -225,7 +225,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
@@ -235,12 +235,18 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
               id="terms"
               name="terms"
               type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
               required
             />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
+            <label
+              htmlFor="terms"
+              className="ml-2 block text-sm text-gray-900 dark:text-gray-300"
+            >
               I agree to the{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-500">
+              <a
+                href="#"
+                className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+              >
                 Terms and Conditions
               </a>
             </label>
@@ -250,7 +256,7 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+              className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800 disabled:opacity-70 disabled:cursor-not-allowed ${
                 loading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
@@ -260,11 +266,11 @@ const SignUp = ({ isAdminSignup = false }: SignUpProps) => {
         </form>
 
         <div className="mt-6">
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{" "}
             <Link
               to={isAdminSignup ? "/admin/login" : "/login"}
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
             >
               Log in here
             </Link>
