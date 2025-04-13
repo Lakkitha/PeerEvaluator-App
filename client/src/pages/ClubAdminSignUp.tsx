@@ -144,14 +144,14 @@ const ClubAdminSignUp = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg dark:bg-gray-800">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6 dark:text-blue-400">
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        <h1 className="text-3xl font-bold text-center text-blue-600 dark:text-blue-400 mb-6">
           Register as Club Coordinator
         </h1>
 
         {error && (
           <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900 dark:border-red-700 dark:text-red-300"
+            className="bg-red-100 border border-red-400 text-red-700 dark:bg-red-900 dark:border-red-700 dark:text-red-300 px-4 py-3 rounded mb-4"
             role="alert"
           >
             <span className="block sm:inline">{error}</span>
@@ -160,7 +160,7 @@ const ClubAdminSignUp = () => {
 
         {fetchingClubs ? (
           <div className="flex justify-center my-6">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -287,7 +287,7 @@ const ClubAdminSignUp = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 ${
+                className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800 disabled:opacity-70 disabled:cursor-not-allowed ${
                   loading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
               >
@@ -302,7 +302,7 @@ const ClubAdminSignUp = () => {
             Already a coordinator?{" "}
             <Link
               to="/admin/login"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
             >
               Log in here
             </Link>
