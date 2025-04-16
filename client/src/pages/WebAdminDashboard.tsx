@@ -10,6 +10,7 @@ import {
 } from "../services/firebase";
 import { useToast } from "../context/ToastContext";
 import ConfirmModal from "../components/ConfirmModal";
+import { handleFirebaseError } from "../utils/firebaseErrorHandler"; // Import the Firebase error handler
 
 interface Club {
   id: string;
