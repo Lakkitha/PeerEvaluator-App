@@ -21,7 +21,11 @@ import {
   Evaluation,
   SharedData,
 } from "../models/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  updatePassword,
+} from "firebase/auth";
 
 // User-related functions
 export async function getCurrentUser() {
@@ -196,7 +200,7 @@ export async function isCurrentUserWebAdmin() {
     return adminDoc.exists();
   } catch (error) {
     console.error("Error checking web admin status:", error);
-    return false; // Return false on error
+    return false; // Return false on error instead of throwing
   }
 }
 
@@ -573,6 +577,72 @@ export async function deleteClub(clubId: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting club:", error);
+    throw error;
+  }
+}
+
+// Add this function to update user password
+export async function updateUserPassword(newPassword: string) {
+  if (!auth.currentUser) {
+    throw new Error("No user is currently logged in");
+  }
+
+  try {
+    await updatePassword(auth.currentUser, newPassword);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error;
+  }
+}
+
+// Add this function to update user settings
+export async function updateUserSettings(settings: {
+  shareEvaluations?: boolean;
+  showInLeaderboards?: boolean;
+  emailNotifications?: boolean;
+  pushNotifications?: boolean;
+}) {
+  if (!auth.currentUser) {
+    throw new Error("No user is currently logged in");
+  }
+
+  try {
+    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+      settings: settings,
+      updatedAt: new Date().toISOString(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user settings:", error);
+    throw error;
+  }
+}
+
+// Add this function to update username
+export async function updateUsername(newUsername: string) {
+  if (!auth.currentUser) {
+    throw new Error("No user is currently logged in");
+  }
+
+  try {
+    // Update display name in auth
+    await updateProfile(auth.currentUser, {
+      displayName: newUsername,
+    });
+
+    // Update in Firestore
+    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+      username: newUsername,
+      updatedAt: new Date().toISOString(),
+    });
+
+    // Update in shared data
+    await updateSharedData();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating username:", error);
     throw error;
   }
 }

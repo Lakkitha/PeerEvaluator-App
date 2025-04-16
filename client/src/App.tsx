@@ -17,6 +17,9 @@ import MemberProgressView from "./pages/MemberProgressView";
 import EvaluationDetails from "./pages/EvaluationDetails";
 import WebAdminLogin from "./pages/WebAdminLogin";
 import WebAdminSignup from "./pages/WebAdminSignup";
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 // Components
 import Layout from "./components/Layout";
@@ -64,24 +67,28 @@ function App() {
 
             <Route path="/init" element={<DbInitializer />} />
 
-          {/* Protected User Routes */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/home" element={<Home />} />
-            <Route path="/evaluate" element={<SpeechEvaluation />} />
-            <Route path="/progress" element={<ProgressTracker />} />
-            <Route path="/evaluation/:evaluationId" element={<EvaluationDetails />} />
-            {/* <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} /> */}
+            {/* Protected User Routes */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/evaluate" element={<SpeechEvaluation />} />
+              <Route path="/progress" element={<ProgressTracker />} />
+              <Route
+                path="/evaluation/:evaluationId"
+                element={<EvaluationDetails />}
+              />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
 
-          {/* Club Admin Routes */}
-          <Route element={<AdminRoute />}>
-            <Route path="/admin/dashboard" element={<ClubAdminDashboard />} />
-            <Route
-              path="/admin/member-progress/:userId"
-              element={<MemberProgressView />}
-            />
-          </Route>
+            {/* Club Admin Routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin/dashboard" element={<ClubAdminDashboard />} />
+              <Route
+                path="/admin/member-progress/:userId"
+                element={<MemberProgressView />}
+              />
+            </Route>
 
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />

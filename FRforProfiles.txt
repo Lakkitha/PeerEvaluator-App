@@ -1,0 +1,169 @@
+Feature Breakdown Document: User Profile & Club Management Pages
+
+This document outlines the content, functionality, and UI requirements for each page accessible from the user profile dropdown menu.
+1. Dashboard Page
+Purpose
+
+Primary hub for users to view evaluations, progress, and club announcements.
+Content & Features
+
+    Recent Evaluations
+
+        List of last 3 evaluations (date, score, quick feedback preview).
+
+        "View All" button linking to full history.
+
+    Progress Overview
+
+        Graph showing performance trends (last 6 months).
+
+        Key strengths/weaknesses (from AI analysis).
+
+    Club Announcements (Coordinator-posted)
+
+        Pinned messages (e.g., upcoming deadlines).
+
+    Quick Actions
+
+        "Start New Evaluation" button.
+
+        "View Club Members" (if coordinator).
+
+UI Notes
+
+    Responsive card layout.
+
+    Priority: Evaluations > Progress > Announcements.
+
+2. Profile Page
+Purpose
+
+View/edit personal details and club affiliation.
+Content & Features
+A. Personal Info Section
+
+    Display:
+
+        Profile picture (editable).
+
+        Name, email (read-only; edit via "Settings").
+
+        Club badge (e.g., "Design Club Member").
+
+    Edit Button: Opens modal for picture/name updates.
+
+B. Club Assignment Section
+
+    Current club card:
+
+        Club name, logo, join date.
+
+        "Request Change" button (members) → Opens club selection modal.
+
+        "Manage Club" button (coordinators) → Links to club admin panel.
+
+C. Stats Overview
+
+    Number of evaluations completed.
+
+    Average rating (if applicable).
+
+UI Notes
+
+    Two-column layout (Personal Info | Club/Stats).
+
+    Highlight current club with border/color.
+
+3. Settings Page
+Purpose
+
+Account and privacy configurations.
+Content & Features
+A. Account Settings
+
+    Change email (requires verification).
+
+    Update password.
+
+    Delete account (with confirmation).
+
+B. Privacy Settings
+
+    Toggle: "Share my evaluations with coordinators."
+
+    Toggle: "Show my name in club leaderboards."
+
+C. Notifications
+
+    Email preferences (e.g., evaluation reminders).
+
+    Push notification toggles.
+
+UI Notes
+
+    Form-style layout with section headers.
+
+    Destructive actions (e.g., delete account) in red.
+
+4. Club Management Page (Coordinator-Only)
+Purpose
+
+Manage club memberships and requests.
+Content & Features
+A. Current Members List
+
+    Table with columns: Name, Email, Role, Join Date.
+
+    Actions per row:
+
+        Promote/Demote (role change).
+
+        Remove (with confirmation).
+
+B. Pending Requests
+
+    List of users requesting to join.
+
+    Actions: Approve/Reject buttons.
+
+C. Add New Members
+
+    Search by email.
+
+    Bulk import (CSV upload).
+
+UI Notes
+
+    Tabbed interface: "Members" | "Requests" | "Add Members".
+
+    Role changes via dropdown to avoid misclicks.
+
+5. Sign Out Flow
+
+    Confirmation modal: "Are you sure you want to sign out?"
+
+    Redirects to login page after signing out.
+
+Database Fields Required
+Page	Data Needed
+Dashboard	Evaluations collection, clubAnnouncements subcollection, user progress metrics.
+Profile	users collection (name, email, clubId, joinDate), clubs collection (logo/name).
+Settings	users collection (email, privacyToggles, notificationPrefs).
+Club Management	users collection (role), clubChangeRequests collection.
+Security Rules Summary
+
+    Profile/Settings: Users can only edit their own data.
+
+    Club Management:
+
+        Coordinators can edit members in their own club only.
+
+        Members can only request club changes.
+
+Next Steps
+
+    Implement Firestore structure updates.
+
+    Build React components for each page.
+
+    Add Firebase Security Rules.
