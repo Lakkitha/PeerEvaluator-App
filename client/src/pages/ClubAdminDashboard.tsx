@@ -9,6 +9,7 @@ import {
   getClubById,
   getClubMembers,
 } from "../services/firebase";
+import { handleFirebaseError } from "../utils/firebaseErrorHandler";
 
 interface UnverifiedUser {
   id: string;

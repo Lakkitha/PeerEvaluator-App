@@ -56,16 +56,25 @@ export async function isUserVerified() {
 }
 
 export async function getUserClub() {
-  const user = await getCurrentUser();
-  if (!user.clubID) {
+  if (!auth.currentUser) {
     return null;
   }
+  
+  try {
+    const user = await getCurrentUser();
+    if (!user.clubID) {
+      return null;
+    }
 
-  const clubDoc = await getDoc(doc(db, "clubs", user.clubID));
-  if (clubDoc.exists()) {
-    return clubDoc.data() as Club;
+    const clubDoc = await getDoc(doc(db, "clubs", user.clubID));
+    if (clubDoc.exists()) {
+      return clubDoc.data() as Club;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting user club:", error);
+    return null;
   }
-  return null;
 }
 
 export async function updateUserLevel(
@@ -124,13 +133,19 @@ export async function isCurrentUserClubAdmin() {
     return false;
   }
 
-  const adminQuery = query(
-    collection(db, "Club_Admins"),
-    where("email", "==", auth.currentUser.email)
-  );
+  try {
+    const adminQuery = query(
+      collection(db, "Club_Admins"),
+      where("email", "==", auth.currentUser.email)
+    );
 
-  const querySnapshot = await getDocs(adminQuery);
-  return !querySnapshot.empty;
+    const querySnapshot = await getDocs(adminQuery);
+    return !querySnapshot.empty;
+  } catch (error) {
+    // Return false instead of throwing an error
+    console.error("Error checking club admin status:", error);
+    return false;
+  }
 }
 
 export async function getCurrentClubAdmin() {
@@ -138,18 +153,24 @@ export async function getCurrentClubAdmin() {
     throw new Error("No user is currently logged in");
   }
 
-  const adminQuery = query(
-    collection(db, "Club_Admins"),
-    where("email", "==", auth.currentUser.email)
-  );
+  try {
+    const adminQuery = query(
+      collection(db, "Club_Admins"),
+      where("email", "==", auth.currentUser.email)
+    );
 
-  const querySnapshot = await getDocs(adminQuery);
-  if (!querySnapshot.empty) {
-    const adminDoc = querySnapshot.docs[0];
-    return { id: adminDoc.id, ...(adminDoc.data() as ClubAdmin) };
+    const querySnapshot = await getDocs(adminQuery);
+    if (!querySnapshot.empty) {
+      const adminDoc = querySnapshot.docs[0];
+      return { id: adminDoc.id, ...(adminDoc.data() as ClubAdmin) };
+    }
+
+    throw new Error("Admin not found");
+  } catch (error) {
+    console.error("Error getting club admin:", error);
+    // Rethrow with a more user-friendly message
+    throw new Error("Could not verify club admin status. Please try again later.");
   }
-
-  throw new Error("Admin not found");
 }
 
 export async function verifyUser(userID: string) {
@@ -165,25 +186,33 @@ export async function verifyUser(userID: string) {
 }
 
 export async function getUnverifiedUsers() {
-  if (!(await isCurrentUserClubAdmin())) {
-    throw new Error("Only club admins can view unverified users");
+  try {
+    // Check if the user is a club admin
+    const isAdmin = await isCurrentUserClubAdmin();
+    if (!isAdmin) {
+      throw new Error("Only club admins can view unverified users");
+    }
+
+    // Get current admin's club
+    const admin = await getCurrentClubAdmin();
+
+    // Get unverified users for this club
+    const usersQuery = query(
+      collection(db, "users"),
+      where("clubID", "==", admin.clubID),
+      where("isVerified", "==", false)
+    );
+
+    const userSnapshot = await getDocs(usersQuery);
+    return userSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as User),
+    }));
+  } catch (error) {
+    console.error("Error getting unverified users:", error);
+    // Return empty array instead of throwing error
+    return [];
   }
-
-  // Get current admin's club
-  const admin = await getCurrentClubAdmin();
-
-  // Get unverified users for this club
-  const usersQuery = query(
-    collection(db, "users"),
-    where("clubID", "==", admin.clubID),
-    where("isVerified", "==", false)
-  );
-
-  const userSnapshot = await getDocs(usersQuery);
-  return userSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as User),
-  }));
 }
 
 // Web admin functions
@@ -195,12 +224,12 @@ export async function isCurrentUserWebAdmin() {
 
   try {
     // Check if user document exists in Web_Admin collection using direct document check
-    // which is more efficient and less likely to have permission issues
     const adminDoc = await getDoc(doc(db, "Web_Admin", auth.currentUser.uid));
     return adminDoc.exists();
   } catch (error) {
+    // Just return false on error instead of throwing
     console.error("Error checking web admin status:", error);
-    return false; // Return false on error instead of throwing
+    return false; 
   }
 }
 
@@ -446,43 +475,62 @@ export async function getAllClubAdmins() {
 // Add these functions to your firebase.ts file
 
 export async function getClubMembers(clubId: string) {
-  // Verify current user is a club admin
-  const admin = await getCurrentClubAdmin();
-  if (admin.clubID !== clubId) {
-    throw new Error("You can only view members from your own club");
-  }
+  try {
+    // Verify current user is a club admin
+    const admin = await getCurrentClubAdmin();
+    if (admin.clubID !== clubId) {
+      throw new Error("You can only view members from your own club");
+    }
 
-  // Get all users that belong to this club and are verified
-  const usersQuery = query(
-    collection(db, "users"),
-    where("clubID", "==", clubId),
-    where("isVerified", "==", true)
-  );
-
-  const querySnapshot = await getDocs(usersQuery);
-
-  // For each user, get their evaluation count
-  const memberPromises = querySnapshot.docs.map(async (doc) => {
-    const userData = doc.data();
-
-    // Count evaluations
-    const evaluationsQuery = query(
-      collection(db, "evaluations"),
-      where("userId", "==", doc.id)
+    // Get all users that belong to this club and are verified
+    const usersQuery = query(
+      collection(db, "users"),
+      where("clubID", "==", clubId),
+      where("isVerified", "==", true)
     );
-    const evaluationSnapshot = await getDocs(evaluationsQuery);
 
-    return {
-      id: doc.id,
-      username: userData.username || "Unknown User",
-      email: userData.email,
-      isVerified: userData.isVerified,
-      joinedDate: userData.createdAt,
-      evaluationCount: evaluationSnapshot.size,
-    };
-  });
+    const querySnapshot = await getDocs(usersQuery);
 
-  return Promise.all(memberPromises);
+    // For each user, get their evaluation count
+    const memberPromises = querySnapshot.docs.map(async (doc) => {
+      const userData = doc.data();
+
+      try {
+        // Count evaluations
+        const evaluationsQuery = query(
+          collection(db, "evaluations"),
+          where("userId", "==", doc.id)
+        );
+        const evaluationSnapshot = await getDocs(evaluationsQuery);
+
+        return {
+          id: doc.id,
+          username: userData.username || "Unknown User",
+          email: userData.email,
+          isVerified: userData.isVerified,
+          joinedDate: userData.createdAt,
+          evaluationCount: evaluationSnapshot.size,
+        };
+      } catch (error) {
+        // If we can't get evaluations, return the user with count 0
+        console.error(`Error getting evaluations for user ${doc.id}:`, error);
+        return {
+          id: doc.id,
+          username: userData.username || "Unknown User",
+          email: userData.email,
+          isVerified: userData.isVerified,
+          joinedDate: userData.createdAt,
+          evaluationCount: 0, // Default to 0 if there's an error
+        };
+      }
+    });
+
+    return Promise.all(memberPromises);
+  } catch (error) {
+    console.error("Error getting club members:", error);
+    // Return empty array instead of throwing
+    return [];
+  }
 }
 
 export async function getUserDetails(userId: string) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { auth, db } from "../firebase";
+import { auth, storage } from "../firebase"; // Fixed import, removed db
 import {
   getCurrentUser,
   getUserClub,
@@ -16,7 +16,8 @@ interface UserProfile {
   userLevel: string;
   clubID: string | null;
   isVerified: boolean;
-  joinedDate: string;
+  joinedDate?: string; // Now optional
+  createdAt?: string; // Add optional createdAt field
 }
 
 interface ClubDetails {
@@ -52,7 +53,24 @@ const Profile = () => {
 
         // Get user profile data
         const userData = await getCurrentUser();
-        setUserProfile(userData);
+
+        // Convert userData to UserProfile type
+        const userProfileData: UserProfile = {
+          username: userData.username,
+          email: userData.email,
+          userPicture: userData.userPicture || null,
+          userLevel: userData.userLevel || "Beginner",
+          clubID: userData.clubID || null,
+          isVerified: userData.isVerified || false,
+          // Handle potential missing joinedDate property
+          joinedDate:
+            userData.joinedDate ||
+            userData.createdAt ||
+            new Date().toISOString(),
+          createdAt: userData.createdAt,
+        };
+
+        setUserProfile(userProfileData);
         setEditName(userData.username);
 
         // Get club information
@@ -74,7 +92,7 @@ const Profile = () => {
         // Calculate average rating if evaluations exist
         if (evaluations.length > 0) {
           const totalRating = evaluations.reduce(
-            (sum, eval) => sum + (eval.scores?.overallImpact || 0),
+            (sum, evaluation) => sum + (evaluation.scores?.overallImpact || 0),
             0
           );
           setAverageRating(totalRating / evaluations.length);
@@ -101,8 +119,11 @@ const Profile = () => {
       setUploading(true);
       const file = e.target.files[0];
 
-      // Create a storage reference
-      const storageRef = ref(db, `profilePictures/${auth.currentUser.uid}`);
+      // Create a storage reference - Use the Firebase storage, not db
+      const storageRef = ref(
+        storage,
+        `profilePictures/${auth.currentUser.uid}`
+      );
 
       // Upload the file
       await uploadBytes(storageRef, file);
