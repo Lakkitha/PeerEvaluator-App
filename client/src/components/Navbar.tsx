@@ -451,27 +451,43 @@ const Navbar = () => {
     try {
       if (isClubAdmin) {
         // If club admin, get club info from admin record
-        const adminData = await getCurrentClubAdmin();
-        if (adminData.clubID) {
-          const club = await getClubById(adminData.clubID);
-          setUserClub({
-            id: adminData.clubID,
-            name: club.clubName,
-            joinDate: adminData.createdAt,
-          });
+        try {
+          const adminData = await getCurrentClubAdmin();
+          if (adminData && adminData.clubID) {
+            const club = await getClubById(adminData.clubID);
+            setUserClub({
+              id: adminData.clubID,
+              name: club.clubName,
+              joinDate: adminData.createdAt,
+            });
+          }
+        } catch (adminError) {
+          console.log("Not a club admin or admin record issue:", adminError);
+          // Don't throw - let the function continue to check normal user path
         }
-      } else {
-        // For regular members, get club info from user record
-        const club = await getUserClub();
-        if (club) {
-          setUserClub({
-            id: club.clubName, // Using clubName as ID - adjust if needed
-            name: club.clubName,
-          });
+      } 
+      
+      // If not a club admin or club admin check failed, try regular user path
+      if (!userClub) {
+        try {
+          const club = await getUserClub();
+          if (club) {
+            setUserClub({
+              id: club.id || club.clubName, // Handle both cases
+              name: club.clubName,
+            });
+          } else {
+            // No club found
+            setUserClub(null);
+          }
+        } catch (userError) {
+          console.log("Error getting user club info:", userError);
+          setUserClub(null);
         }
       }
     } catch (error) {
       console.error("Error fetching user club information:", error);
+      setUserClub(null);
     }
   };
 
