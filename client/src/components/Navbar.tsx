@@ -465,8 +465,8 @@ const Navbar = () => {
           console.log("Not a club admin or admin record issue:", adminError);
           // Don't throw - let the function continue to check normal user path
         }
-      } 
-      
+      }
+
       // If not a club admin or club admin check failed, try regular user path
       if (!userClub) {
         try {

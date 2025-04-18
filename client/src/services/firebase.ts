@@ -64,13 +64,13 @@ export async function getUserClub() {
     // Check if the user document exists first
     const userDocRef = doc(db, "users", auth.currentUser.uid);
     const userDoc = await getDoc(userDocRef);
-    
+
     if (!userDoc.exists()) {
       console.log("User document does not exist, may need to create one");
       // Return null instead of throwing an error
       return null;
     }
-    
+
     const userData = userDoc.data();
     if (!userData.clubID) {
       return null;
@@ -591,8 +591,10 @@ export async function getClubMembers(clubId: string) {
         evaluationCount = evaluationSnapshot.size;
       } catch (evalError) {
         // Don't log permission errors in production
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Couldn't access evaluations for user ${doc.id} (this is normal if permissions are limited)`);
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `Couldn't access evaluations for user ${doc.id} (this is normal if permissions are limited)`
+          );
         }
         evaluationCount = 0; // Default to 0 if there's a permission error
       }

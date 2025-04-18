@@ -13,11 +13,11 @@ service cloud.firestore {
     function isClubAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/Club_Admins/$(request.auth.uid));
     }
-    
+
     function getUserClubId(userId) {
       return get(/databases/$(database)/documents/users/$(userId)).data.clubID;
     }
-    
+
     function getAdminClubId() {
       return get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID;
     }
@@ -72,19 +72,19 @@ service cloud.firestore {
       allow read: if isSignedIn() && (
         resource.data.userId == request.auth.uid || // User's own evaluations
         isWebAdmin() || // Web admins can read all evaluations
-        (isClubAdmin() && 
+        (isClubAdmin() &&
           resource.data.clubID == getAdminClubId() // Evaluations from the admin's club
         )
       );
-      
+
       allow create: if isSignedIn();
-      
+
       allow update: if isSignedIn() && (
-        resource.data.userId == request.auth.uid || 
+        resource.data.userId == request.auth.uid ||
         isWebAdmin() ||
         (isClubAdmin() && resource.data.clubID == getAdminClubId())
       );
-      
+
       allow delete: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
         isWebAdmin() ||
