@@ -59,14 +59,24 @@ export async function getUserClub() {
   if (!auth.currentUser) {
     return null;
   }
-  
+
   try {
-    const user = await getCurrentUser();
-    if (!user.clubID) {
+    // Check if the user document exists first
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      console.log("User document does not exist, may need to create one");
+      // Return null instead of throwing an error
       return null;
     }
 
-    const clubDoc = await getDoc(doc(db, "clubs", user.clubID));
+    const userData = userDoc.data();
+    if (!userData.clubID) {
+      return null;
+    }
+
+    const clubDoc = await getDoc(doc(db, "clubs", userData.clubID));
     if (clubDoc.exists()) {
       return clubDoc.data() as Club;
     }
@@ -169,7 +179,9 @@ export async function getCurrentClubAdmin() {
   } catch (error) {
     console.error("Error getting club admin:", error);
     // Rethrow with a more user-friendly message
-    throw new Error("Could not verify club admin status. Please try again later.");
+    throw new Error(
+      "Could not verify club admin status. Please try again later."
+    );
   }
 }
 
@@ -223,13 +235,20 @@ export async function isCurrentUserWebAdmin() {
   }
 
   try {
-    // Check if user document exists in Web_Admin collection using direct document check
+    // Use a different approach - check if the user's UID matches any document in Web_Admin
+    // The security rules should allow a user to read their own document
     const adminDoc = await getDoc(doc(db, "Web_Admin", auth.currentUser.uid));
     return adminDoc.exists();
   } catch (error) {
-    // Just return false on error instead of throwing
-    console.error("Error checking web admin status:", error);
-    return false; 
+    // Silently handle permission errors
+    if (process.env.NODE_ENV === "development") {
+      // Log the error only in development, but don't show it as a console.error to avoid red noise
+      console.log(
+        "Admin check info:",
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+    return false;
   }
 }
 
@@ -284,36 +303,87 @@ export async function createClubAdmin(adminData: {
 
 // Evaluation functions
 export async function getEvaluationsForUser(userId: string) {
-  const evaluationsQuery = query(
-    collection(db, "evaluations"),
-    where("userId", "==", userId),
-    orderBy("createdAt", "desc") // Sort by newest first
-  );
+  try {
+    // Try the query with ordering first
+    const evaluationsQuery = query(
+      collection(db, "evaluations"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc") // Sort by newest first
+    );
 
-  const querySnapshot = await getDocs(evaluationsQuery);
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Evaluation),
-  }));
+    const querySnapshot = await getDocs(evaluationsQuery);
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Evaluation),
+    }));
+  } catch (error: any) {
+    // If it's specifically an index error (index is building)
+    if (
+      error?.message?.includes("The query requires an index") ||
+      error?.message?.includes("currently building")
+    ) {
+      console.warn(
+        "Firestore index is building. Using alternative method to fetch evaluations."
+      );
+
+      // Alternative: Get all user evaluations without ordering first
+      try {
+        // Use only the filter without the orderBy
+        const fallbackQuery = query(
+          collection(db, "evaluations"),
+          where("userId", "==", userId)
+        );
+
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+
+        // Get all documents and sort them manually in JavaScript
+        const evaluations = fallbackSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Evaluation),
+        }));
+
+        // Sort manually by createdAt in descending order
+        return evaluations.sort((a, b) => {
+          // Handle missing createdAt field safely
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA; // Descending order
+        });
+      } catch (fallbackError) {
+        console.error("Alternative method also failed:", fallbackError);
+        return []; // Return empty array as a last resort
+      }
+    }
+
+    // For other errors, just log and throw
+    console.error("Error fetching evaluations:", error);
+    throw error;
+  }
 }
 
 export async function getEvaluationsForClub(clubId: string) {
-  // Check if current user is a club admin for this club
-  const admin = await getCurrentClubAdmin();
-  if (admin.clubID !== clubId) {
-    throw new Error("You can only view evaluations for your own club");
+  try {
+    // Check if current user is a club admin for this club
+    const admin = await getCurrentClubAdmin();
+    if (admin.clubID !== clubId) {
+      throw new Error("You can only view evaluations for your own club");
+    }
+
+    const evaluationsQuery = query(
+      collection(db, "evaluations"),
+      where("clubID", "==", clubId)
+    );
+
+    const querySnapshot = await getDocs(evaluationsQuery);
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Evaluation),
+    }));
+  } catch (error) {
+    console.error("Error fetching evaluations for club:", error);
+    // Return an empty array instead of throwing to prevent dashboard errors
+    return [];
   }
-
-  const evaluationsQuery = query(
-    collection(db, "evaluations"),
-    where("clubID", "==", clubId)
-  );
-
-  const querySnapshot = await getDocs(evaluationsQuery);
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Evaluation),
-  }));
 }
 
 // Add this function
@@ -322,7 +392,21 @@ export async function getCurrentUserEvaluations() {
     throw new Error("No user is currently logged in");
   }
 
-  return getEvaluationsForUser(auth.currentUser.uid);
+  try {
+    return await getEvaluationsForUser(auth.currentUser.uid);
+  } catch (error: any) {
+    // Check if it's an index error
+    if (error?.message?.includes("The query requires an index")) {
+      console.warn(
+        "Missing Firestore index. Please visit the URL in the error message to create it.",
+        error
+      );
+      // Return empty array as fallback
+      return [];
+    }
+    // Otherwise rethrow
+    throw error;
+  }
 }
 
 // Add this function
@@ -495,6 +579,8 @@ export async function getClubMembers(clubId: string) {
     const memberPromises = querySnapshot.docs.map(async (doc) => {
       const userData = doc.data();
 
+      // Get evaluation count safely - handle permissions errors
+      let evaluationCount = 0;
       try {
         // Count evaluations
         const evaluationsQuery = query(
@@ -502,27 +588,25 @@ export async function getClubMembers(clubId: string) {
           where("userId", "==", doc.id)
         );
         const evaluationSnapshot = await getDocs(evaluationsQuery);
-
-        return {
-          id: doc.id,
-          username: userData.username || "Unknown User",
-          email: userData.email,
-          isVerified: userData.isVerified,
-          joinedDate: userData.createdAt,
-          evaluationCount: evaluationSnapshot.size,
-        };
-      } catch (error) {
-        // If we can't get evaluations, return the user with count 0
-        console.error(`Error getting evaluations for user ${doc.id}:`, error);
-        return {
-          id: doc.id,
-          username: userData.username || "Unknown User",
-          email: userData.email,
-          isVerified: userData.isVerified,
-          joinedDate: userData.createdAt,
-          evaluationCount: 0, // Default to 0 if there's an error
-        };
+        evaluationCount = evaluationSnapshot.size;
+      } catch (evalError) {
+        // Don't log permission errors in production
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            `Couldn't access evaluations for user ${doc.id} (this is normal if permissions are limited)`
+          );
+        }
+        evaluationCount = 0; // Default to 0 if there's a permission error
       }
+
+      return {
+        id: doc.id,
+        username: userData.username || "Unknown User",
+        email: userData.email,
+        isVerified: userData.isVerified,
+        joinedDate: userData.createdAt,
+        evaluationCount: evaluationCount,
+      };
     });
 
     return Promise.all(memberPromises);
