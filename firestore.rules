@@ -20,7 +20,7 @@ service cloud.firestore {
       allow create: if request.auth.uid == userId;
       allow update: if request.auth.uid == userId ||
                      (isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID) ||
-                     isWebAdmin(); // Add web admin permission
+                     isWebAdmin();
       allow delete: if isWebAdmin();
     }
 
@@ -49,9 +49,10 @@ service cloud.firestore {
       allow delete: if isWebAdmin();
     }
 
-    // Web_Admin data access rules
+    // Web_Admin data access rules - updated to allow self document access
     match /Web_Admin/{adminId} {
-      allow read: if isWebAdmin();
+      // Allow users to read their own document to check if they are an admin
+      allow read: if adminId == request.auth.uid || isWebAdmin();
       allow create: if request.auth.uid == adminId || isWebAdmin();
       allow update: if request.auth.uid == adminId;
       allow delete: if isWebAdmin() && request.auth.uid != adminId; // Cannot delete self
@@ -62,16 +63,16 @@ service cloud.firestore {
       allow read: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
         (isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID) ||
-        isWebAdmin() // Add web admin read permission
+        isWebAdmin()
       );
       allow create: if isSignedIn();
       allow update: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        isWebAdmin() // Allow web admins to update evaluations
+        isWebAdmin()
       );
       allow delete: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
-        isWebAdmin() || // Allow web admins to delete evaluations
+        isWebAdmin() ||
         isClubAdmin() && resource.data.clubID == get(/databases/$(database)/documents/Club_Admins/$(request.auth.uid)).data.clubID
       );
     }

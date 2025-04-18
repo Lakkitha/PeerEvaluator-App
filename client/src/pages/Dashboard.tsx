@@ -56,8 +56,14 @@ const Dashboard = () => {
         setUserData(user);
 
         // Get user evaluations
-        const userEvaluations = await getCurrentUserEvaluations();
-        setEvaluations(userEvaluations);
+        try {
+          const userEvaluations = await getCurrentUserEvaluations();
+          setEvaluations(userEvaluations);
+        } catch (evalError) {
+          console.warn("Error fetching user evaluations:", evalError);
+          // Set empty array instead of failing completely
+          setEvaluations([]);
+        }
 
         // Mock club announcements - in a real app, these would come from Firestore
         // For future implementation: Fetch from a 'clubAnnouncements' collection
@@ -94,7 +100,16 @@ const Dashboard = () => {
         ]);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
-        setError("Failed to load your dashboard. Please try again later.");
+        if (err instanceof Error) {
+          // Don't show Firebase index errors to the user
+          if (err.message.includes("requires an index")) {
+            setError("Failed to load some data. Please try again later.");
+          } else {
+            setError(err.message || "Failed to load dashboard data");
+          }
+        } else {
+          setError("An unexpected error occurred");
+        }
       } finally {
         setLoading(false);
       }

@@ -59,7 +59,7 @@ export async function getUserClub() {
   if (!auth.currentUser) {
     return null;
   }
-  
+
   try {
     const user = await getCurrentUser();
     if (!user.clubID) {
@@ -169,7 +169,9 @@ export async function getCurrentClubAdmin() {
   } catch (error) {
     console.error("Error getting club admin:", error);
     // Rethrow with a more user-friendly message
-    throw new Error("Could not verify club admin status. Please try again later.");
+    throw new Error(
+      "Could not verify club admin status. Please try again later."
+    );
   }
 }
 
@@ -223,13 +225,20 @@ export async function isCurrentUserWebAdmin() {
   }
 
   try {
-    // Check if user document exists in Web_Admin collection using direct document check
+    // Use a different approach - check if the user's UID matches any document in Web_Admin
+    // The security rules should allow a user to read their own document
     const adminDoc = await getDoc(doc(db, "Web_Admin", auth.currentUser.uid));
     return adminDoc.exists();
   } catch (error) {
-    // Just return false on error instead of throwing
-    console.error("Error checking web admin status:", error);
-    return false; 
+    // Silently handle permission errors
+    if (process.env.NODE_ENV === "development") {
+      // Log the error only in development, but don't show it as a console.error to avoid red noise
+      console.log(
+        "Admin check info:",
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+    return false;
   }
 }
 
@@ -284,17 +293,62 @@ export async function createClubAdmin(adminData: {
 
 // Evaluation functions
 export async function getEvaluationsForUser(userId: string) {
-  const evaluationsQuery = query(
-    collection(db, "evaluations"),
-    where("userId", "==", userId),
-    orderBy("createdAt", "desc") // Sort by newest first
-  );
+  try {
+    // Try the query with ordering first
+    const evaluationsQuery = query(
+      collection(db, "evaluations"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc") // Sort by newest first
+    );
 
-  const querySnapshot = await getDocs(evaluationsQuery);
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Evaluation),
-  }));
+    const querySnapshot = await getDocs(evaluationsQuery);
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Evaluation),
+    }));
+  } catch (error: any) {
+    // If it's specifically an index error (index is building)
+    if (
+      error?.message?.includes("The query requires an index") ||
+      error?.message?.includes("currently building")
+    ) {
+      console.warn(
+        "Firestore index is building. Using alternative method to fetch evaluations."
+      );
+
+      // Alternative: Get all user evaluations without ordering first
+      try {
+        // Use only the filter without the orderBy
+        const fallbackQuery = query(
+          collection(db, "evaluations"),
+          where("userId", "==", userId)
+        );
+
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+
+        // Get all documents and sort them manually in JavaScript
+        const evaluations = fallbackSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Evaluation),
+        }));
+
+        // Sort manually by createdAt in descending order
+        return evaluations.sort((a, b) => {
+          // Handle missing createdAt field safely
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA; // Descending order
+        });
+      } catch (fallbackError) {
+        console.error("Alternative method also failed:", fallbackError);
+        return []; // Return empty array as a last resort
+      }
+    }
+
+    // For other errors, just log and throw
+    console.error("Error fetching evaluations:", error);
+    throw error;
+  }
 }
 
 export async function getEvaluationsForClub(clubId: string) {
@@ -322,7 +376,21 @@ export async function getCurrentUserEvaluations() {
     throw new Error("No user is currently logged in");
   }
 
-  return getEvaluationsForUser(auth.currentUser.uid);
+  try {
+    return await getEvaluationsForUser(auth.currentUser.uid);
+  } catch (error: any) {
+    // Check if it's an index error
+    if (error?.message?.includes("The query requires an index")) {
+      console.warn(
+        "Missing Firestore index. Please visit the URL in the error message to create it.",
+        error
+      );
+      // Return empty array as fallback
+      return [];
+    }
+    // Otherwise rethrow
+    throw error;
+  }
 }
 
 // Add this function
