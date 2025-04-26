@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import ScoreCard from "../components/ScoreCard";
 
 interface EvaluationDetails {
   id: string;
@@ -28,6 +29,52 @@ const EvaluationDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+
+  // Performance metrics data
+  const metricDefinitions = [
+    {
+      key: "clarity",
+      label: "Clarity",
+      icon: "💬",
+      description: "How clear and understandable your message was",
+    },
+    {
+      key: "coherence",
+      label: "Coherence",
+      icon: "🧩",
+      description: "How well your ideas flowed together logically",
+    },
+    {
+      key: "delivery",
+      label: "Delivery",
+      icon: "🎭",
+      description: "Your speaking style, pace, and vocal variety",
+    },
+    {
+      key: "vocabulary",
+      label: "Vocabulary",
+      icon: "📚",
+      description: "The effectiveness and variety of your word choice",
+    },
+    {
+      key: "overallImpact",
+      label: "Overall Impact",
+      icon: "✨",
+      description: "The overall effectiveness and memorability of your speech",
+    },
+    {
+      key: "fluency",
+      label: "Fluency",
+      icon: "🌊",
+      description: "How smoothly you spoke without hesitation",
+    },
+    {
+      key: "engagement",
+      label: "Engagement",
+      icon: "🤝",
+      description: "How well you connected with and engaged your audience",
+    },
+  ];
 
   useEffect(() => {
     const fetchEvaluation = async () => {
@@ -172,38 +219,21 @@ const EvaluationDetails = () => {
 
       {/* Scores Breakdown */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4">Scores Breakdown</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {[
-            { key: "clarity", label: "Clarity" },
-            { key: "coherence", label: "Coherence" },
-            { key: "delivery", label: "Delivery" },
-            { key: "vocabulary", label: "Vocabulary" },
-            { key: "overallImpact", label: "Overall Impact" },
-            { key: "fluency", label: "Fluency" },
-            { key: "engagement", label: "Engagement" },
-          ].map((item) => {
+        <h3 className="text-xl font-semibold mb-4">Performance Metrics</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {metricDefinitions.map((metric) => {
             const score =
-              evaluation.scores[item.key as keyof typeof evaluation.scores];
+              evaluation.scores[metric.key as keyof typeof evaluation.scores];
             if (typeof score !== "number") return null;
 
             return (
-              <div key={item.key} className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700">
-                    {item.label}
-                  </span>
-                  <span className="text-sm font-medium text-blue-600">
-                    {score}/10
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${(score / 10) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
+              <ScoreCard
+                key={metric.key}
+                label={metric.label}
+                icon={metric.icon}
+                description={metric.description}
+                score={score}
+              />
             );
           })}
         </div>
@@ -237,7 +267,7 @@ const EvaluationDetails = () => {
         </button>
         {isOwner && (
           <button
-            onClick={() => navigate("/progress")}
+            onClick={() => navigate("/progresstracking")}
             className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
           >
             View All Progress

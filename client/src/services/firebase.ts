@@ -778,3 +778,55 @@ export async function updateUsername(newUsername: string) {
     throw error;
   }
 }
+
+// Add function to save evaluation
+export async function saveEvaluation(evaluation: {
+  transcript: string;
+  scores: {
+    clarity: number;
+    coherence: number;
+    delivery: number;
+    vocabulary: number;
+    overallImpact: number;
+    fluency: number;
+    engagement: number;
+  };
+  feedback: string;
+  suggestions?: string[];
+}) {
+  if (!auth.currentUser) {
+    throw new Error("No user is currently logged in");
+  }
+
+  try {
+    // Get the current user to fetch additional info
+    const user = await getCurrentUser();
+    const now = new Date().toISOString();
+
+    // Prepare the evaluation object with user data
+    const evaluationData = {
+      userId: auth.currentUser.uid,
+      username:
+        user.username || auth.currentUser.displayName || "Anonymous User",
+      clubID: user.clubID || "",
+      transcript: evaluation.transcript,
+      scores: evaluation.scores,
+      feedback: evaluation.feedback,
+      suggestions: evaluation.suggestions || [],
+      date: now,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // Add to evaluations collection
+    const docRef = await addDoc(collection(db, "evaluations"), evaluationData);
+
+    return {
+      id: docRef.id,
+      ...evaluationData,
+    };
+  } catch (error) {
+    console.error("Error saving evaluation:", error);
+    throw error;
+  }
+}
