@@ -68,40 +68,45 @@ const SpeechEvaluation = () => {
       setError("");
 
       // Call the API to evaluate the speech
-      const result = await evaluateSpeech(transcript);
+      const rawFeedback = await evaluateSpeech(transcript);
 
-      // Parse the result from string into structured data
-      // In a real app, this would be handled by the API returning JSON
-      // This is just a placeholder for demonstration
-      const mockEvaluation: EvaluationResult = {
+      // Import the parser function directly
+      const { parseEvaluationResponse } = await import("../services/openai");
+
+      // Parse the AI response to extract structured data
+      const parsedEvaluation = parseEvaluationResponse(rawFeedback);
+
+      // Create evaluation result using the actual parsed scores and feedback
+      const evaluation: EvaluationResult = {
         transcript: transcript,
         scores: {
-          clarity: Math.floor(Math.random() * 3) + 7, // Random score between 7-9
-          coherence: Math.floor(Math.random() * 3) + 6, // Random score between 6-8
-          delivery: Math.floor(Math.random() * 4) + 5, // Random score between 5-8
-          vocabulary: Math.floor(Math.random() * 3) + 7, // Random score between 7-9
-          overallImpact: Math.floor(Math.random() * 3) + 7, // Random score between 7-9
-          fluency: Math.floor(Math.random() * 4) + 6, // Random score between 6-9
-          engagement: Math.floor(Math.random() * 3) + 6, // Random score between 6-8
+          clarity: parsedEvaluation.clarity,
+          coherence: parsedEvaluation.coherence,
+          delivery: parsedEvaluation.delivery,
+          vocabulary: parsedEvaluation.vocabulary,
+          overallImpact: parsedEvaluation.overallImpact,
+          // Extract these additional scores from the raw feedback
+          fluency: parseScoreFromText(rawFeedback, "fluency"),
+          engagement: parseScoreFromText(
+            rawFeedback,
+            "engagement",
+            "engagement levels"
+          ),
         },
-        feedback: result,
-        suggestions: [
-          "Focus on varying your tone to maintain audience engagement",
-          "Try incorporating more concrete examples to illustrate key points",
-          "Work on maintaining consistent eye contact with your audience",
-        ],
+        feedback: rawFeedback,
+        suggestions: parsedEvaluation.suggestions,
       };
 
-      setEvaluationResult(mockEvaluation);
+      setEvaluationResult(evaluation);
       setSaveStatus("saving");
 
       // Save to database
       try {
         await saveEvaluation({
-          transcript: mockEvaluation.transcript,
-          scores: mockEvaluation.scores,
-          feedback: mockEvaluation.feedback,
-          suggestions: mockEvaluation.suggestions,
+          transcript: evaluation.transcript,
+          scores: evaluation.scores,
+          feedback: evaluation.feedback,
+          suggestions: evaluation.suggestions,
         });
         setSaveStatus("success");
         setHasEvaluations(true);
@@ -380,5 +385,24 @@ const SpeechEvaluation = () => {
     </div>
   );
 };
+
+// Helper function to parse scores from text (copied from openai.ts)
+function parseScoreFromText(text: string, ...keywords: string[]): number {
+  // Look for patterns like "Clarity: 7/10" or "Grammar score: 7"
+  for (const keyword of keywords) {
+    const regex = new RegExp(
+      `${keyword}[^\\d]*(\\d{1,2})(?:\\s*\\/\\s*10)?`,
+      "i"
+    );
+    const match = text.match(regex);
+    if (match && match[1]) {
+      const score = parseInt(match[1]);
+      if (!isNaN(score) && score >= 0 && score <= 10) {
+        return score;
+      }
+    }
+  }
+  return 5; // Default score if not found
+}
 
 export default SpeechEvaluation;
