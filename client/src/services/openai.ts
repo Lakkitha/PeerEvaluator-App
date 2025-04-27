@@ -222,6 +222,16 @@ function parseScoreFromText(text: string, ...keywords: string[]): number {
  */
 export async function evaluateSpeech(transcription: string): Promise<string> {
   try {
+    // Check if the transcription is too short
+    const wordCount = transcription.trim().split(/\s+/).length;
+    const MINIMUM_WORD_COUNT = 20; // Set minimum word requirement
+
+    if (wordCount < MINIMUM_WORD_COUNT) {
+      throw new Error(
+        `Speech is too short (${wordCount} words). Please record a speech with at least ${MINIMUM_WORD_COUNT} words for a meaningful evaluation.`
+      );
+    }
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [

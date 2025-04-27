@@ -14,7 +14,8 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
     valid: boolean;
     message: string;
   } | null>(null);
-  const [localTranscript, setLocalTranscript] = useState<string>("");  // New state for local transcript
+  const [localTranscript, setLocalTranscript] = useState<string>(""); // New state for local transcript
+  const [wordCount, setWordCount] = useState<number>(0); // New state for word count
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -29,12 +30,26 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
         }
         setApiKeyStatus(result);
       } catch (err) {
-        setError(`Failed to verify API key: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        setError(
+          `Failed to verify API key: ${
+            err instanceof Error ? err.message : "Unknown error"
+          }`
+        );
       }
     };
 
     checkApiKey();
   }, []);
+
+  // Update word count when transcript changes
+  useEffect(() => {
+    if (localTranscript) {
+      const words = localTranscript.trim().split(/\s+/);
+      setWordCount(words.length);
+    } else {
+      setWordCount(0);
+    }
+  }, [localTranscript]);
 
   const startRecording = async () => {
     try {
@@ -169,12 +184,30 @@ const AudioRecorder = ({ onTranscriptUpdate }: AudioRecorderProps) => {
         </div>
       )}
 
-      {/* New transcript display section */}
+      {/* New transcript display section with word counter */}
       {localTranscript && (
         <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
-          <h3 className="text-xl font-semibold mb-2">Transcript:</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Transcript:</h3>
+            <div className="text-sm">
+              <span
+                className={`font-medium ${
+                  wordCount < 20 ? "text-red-500" : "text-green-500"
+                }`}
+              >
+                {wordCount} {wordCount === 1 ? "word" : "words"}
+              </span>
+              {wordCount < 20 && (
+                <span className="text-red-500 ml-1">
+                  (Need at least 20 words for evaluation)
+                </span>
+              )}
+            </div>
+          </div>
           <div className="max-h-60 overflow-y-auto">
-            <p className="whitespace-pre-wrap text-gray-700">{localTranscript}</p>
+            <p className="whitespace-pre-wrap text-gray-700">
+              {localTranscript}
+            </p>
           </div>
         </div>
       )}
