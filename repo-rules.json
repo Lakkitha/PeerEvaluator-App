@@ -1,0 +1,109 @@
+{
+    "rules": [
+      {
+        "type": "branch",
+        "name": "development-protection",
+        "parameters": {
+          "pattern": "development",
+          "target_branch": "development",
+          "requires_pull_request": true,
+          "requires_approving_reviews": true,
+          "required_approving_review_count": 1,
+          "dismisses_stale_reviews": true,
+          "restricts_review_dismissals": true,
+          "restricts_pushes": true,
+          "blocks_deletions": true,
+          "blocks_force_pushes": true,
+          "allow_actor_deletion": false
+        },
+        "settings": {
+          "bypass_actors": [
+            {
+              "actor_id": "Lakkitha",{
+                "rules": [
+                  {
+                    "type": "branch",
+                    "name": "development-protection",
+                    "parameters": {
+                      "pattern": "development",
+                      "target_branch": "development",
+                      "requires_pull_request": true,
+                      "requires_approving_reviews": true,
+                      "required_approving_review_count": 1,
+                      "dismisses_stale_reviews": true,
+                      "restricts_review_dismissals": true,
+                      "restricts_pushes": true,
+                      "blocks_deletions": true,
+                      "blocks_force_pushes": true
+                    },
+                    "settings": {
+                      "bypass_actors": [
+                        {
+                          "actor_id": "Lakkitha",
+                          "actor_type": "User",
+                          "bypass_mode": "always"
+                        }
+                      ],
+                      "requires_signatures": true,
+                      "requires_conversation_resolution": true
+                    }
+                  },
+                  {
+                    "type": "branch",
+                    "name": "production-protection",
+                    "parameters": {
+                      "pattern": "production",
+                      "target_branch": "production",
+                      "requires_pull_request": true,
+                      "requires_approving_reviews": true,
+                      "required_approving_review_count": 1,
+                      "restricts_pushes": true,
+                      "blocks_deletions": true,
+                      "blocks_force_pushes": true
+                    },
+                    "settings": {
+                      "allowed_source_branches": ["development"],
+                      "bypass_actors": [
+                        {
+                          "actor_id": "Lakkitha",
+                          "actor_type": "User",
+                          "bypass_mode": "always"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+              "actor_type": "User",
+              "bypass_mode": "always"
+            }
+          ],
+          "requires_signatures": true,
+          "requires_conversation_resolution": true
+        }
+      },
+      {
+        "type": "branch",
+        "name": "production-protection",
+        "parameters": {
+          "pattern": "production",
+          "target_branch": "production",
+          "requires_pull_request": true,
+          "required_approving_review_count": 1,
+          "restricts_pushes": true,
+          "blocks_deletions": true,
+          "blocks_force_pushes": true
+        },
+        "settings": {
+          "allowed_source_branches": ["development"],
+          "bypass_actors": [
+            {
+              "actor_id": "YOUR_ACTUAL_GITHUB_USERNAME",
+              "actor_type": "User",
+              "bypass_mode": "always"
+            }
+          ]
+        }
+      }
+    ]
+  }
