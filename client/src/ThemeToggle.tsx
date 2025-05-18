@@ -18,30 +18,35 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
   }, []);
 
   // Apply the selected theme
-  const applyTheme = useCallback((newTheme: Theme) => {
-    const root = document.documentElement;
+  const applyTheme = useCallback(
+    (newTheme: Theme) => {
+      const root = document.documentElement;
 
-    if (newTheme === "system") {
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if (systemPrefersDark) {
+      if (newTheme === "system") {
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        if (systemPrefersDark) {
+          root.classList.add("dark");
+        } else {
+          root.classList.remove("dark");
+        }
+      } else if (newTheme === "dark") {
         root.classList.add("dark");
       } else {
         root.classList.remove("dark");
       }
-    } else if (newTheme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    
-    setIsDarkMode(checkIsDarkMode());
-  }, [checkIsDarkMode]);
+
+      setIsDarkMode(checkIsDarkMode());
+    },
+    [checkIsDarkMode]
+  );
 
   // Initialize theme on component mount
   useEffect(() => {
     // Check localStorage for saved preference
     const savedTheme = localStorage.getItem("color-theme") as Theme | null;
-    
+
     // Set the initial state based on the actual DOM state
     setIsDarkMode(checkIsDarkMode());
 
@@ -57,7 +62,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
   // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
+
     const handleChange = () => {
       if (theme === "system") {
         applyTheme("system");
