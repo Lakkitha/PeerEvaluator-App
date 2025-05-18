@@ -1,67 +1,92 @@
-import { useEffect, useState } from "react";
+// filepath: d:\lakkitha\Github\PeerEvaluator-App\client\src\ThemeToggle.tsx
+import { useEffect, useState, useCallback } from "react";
 
 interface ThemeToggleProps {
   className?: string; // Allow custom styling from parent components
 }
 
 // Create a type for themes to avoid string literals
-type Theme = 'dark' | 'light' | 'system';
+type Theme = "dark" | "light" | "system";
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
-  const [theme, setTheme] = useState<Theme>('system');
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
+  const [theme, setTheme] = useState<Theme>("system");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Check if dark mode is currently active
+  const checkIsDarkMode = useCallback(() => {
+    return document.documentElement.classList.contains("dark");
+  }, []);
+
+  // Apply the selected theme
+  const applyTheme = useCallback((newTheme: Theme) => {
+    const root = document.documentElement;
+
+    if (newTheme === "system") {
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (systemPrefersDark) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    } else if (newTheme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    
+    setIsDarkMode(checkIsDarkMode());
+  }, [checkIsDarkMode]);
 
   // Initialize theme on component mount
   useEffect(() => {
     // Check localStorage for saved preference
-    const savedTheme = localStorage.getItem('color-theme') as Theme | null;
+    const savedTheme = localStorage.getItem("color-theme") as Theme | null;
+    
+    // Set the initial state based on the actual DOM state
+    setIsDarkMode(checkIsDarkMode());
 
     if (savedTheme) {
       setTheme(savedTheme);
       applyTheme(savedTheme);
     } else {
-      // If no preference is saved, use system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme('system');
-      applyTheme(prefersDark ? 'dark' : 'light');
-
-      // Listen for system theme changes
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = (e: MediaQueryListEvent) => {
-        if (theme === 'system') {
-          applyTheme(e.matches ? 'dark' : 'light');
-        }
-      };
-
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
+      setTheme("system");
+      applyTheme("system");
     }
-  }, []);
+  }, [applyTheme, checkIsDarkMode]);
 
-  // Apply the selected theme
-  const applyTheme = (newTheme: Theme | 'system') => {
-    const root = document.documentElement;
+  // Listen for system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = () => {
+      if (theme === "system") {
+        applyTheme("system");
+      }
+    };
 
-    if (newTheme === 'system') {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', systemPrefersDark);
-    } else {
-      root.classList.toggle('dark', newTheme === 'dark');
-    }
-  };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [theme, applyTheme]);
+
+  // Effect to update isDarkMode when the theme changes in the DOM
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(checkIsDarkMode());
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, [checkIsDarkMode]);
 
   // Toggle between light and dark themes
   const toggleTheme = () => {
-    const newTheme = theme === 'light' || (theme === 'system' && !document.documentElement.classList.contains('dark'))
-      ? 'dark'
-      : 'light';
+    const isCurrentlyDark = checkIsDarkMode();
+    const newTheme = isCurrentlyDark ? "light" : "dark";
 
     setTheme(newTheme);
     applyTheme(newTheme);
-    localStorage.setItem('color-theme', newTheme);
+    localStorage.setItem("color-theme", newTheme);
   };
-
-  // Get current active theme appearance (not preference)
-  const isDarkMode = document.documentElement.classList.contains('dark');
 
   return (
     <button
