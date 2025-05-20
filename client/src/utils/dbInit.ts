@@ -47,23 +47,19 @@ export async function initializeDatabase() {
       for (const club of clubs) {
         await addDoc(collection(db, "clubs"), club);
       }
-    }
-
-    // Check if web admin exists
+    } // Check if web admin exists
     const webAdminQuery = query(
       collection(db, "Web_Admin"), // Changed from "mainWebAdmins"
-      where("email", "==", "admin@peerevaluator.com")
+      where("email", "==", "admin@speaksmart.com")
     );
     const webAdminSnapshot = await getDocs(webAdminQuery);
 
     if (webAdminSnapshot.empty) {
-      console.log("Creating web admin...");
-
-      // Create web admin account
+      console.log("Creating web admin..."); // Create web admin account
       try {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
-          "admin@peerevaluator.com",
+          "admin@speaksmart.com",
           "adminpass123" // This should be changed immediately
         );
 
@@ -71,7 +67,7 @@ export async function initializeDatabase() {
         await setDoc(doc(db, "Web_Admin", userCredential.user.uid), {
           // Changed from "mainWebAdmins"
           adminName: "Super Admin",
-          email: "admin@peerevaluator.com",
+          email: "admin@speaksmart.com",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });

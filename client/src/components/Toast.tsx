@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import logo from "../assets/SpeakSmart-Logo.png";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -103,7 +104,6 @@ const Toast = ({
   };
 
   const { bgColor, textColor, icon, srText } = iconAndColors[type];
-
   return (
     <div className="fixed top-4 right-4 z-50">
       <div
@@ -112,11 +112,14 @@ const Toast = ({
         }`}
         role="alert"
       >
-        <div
-          className={`inline-flex items-center justify-center shrink-0 w-8 h-8 ${textColor} ${bgColor} rounded-lg`}
-        >
-          {icon}
-          <span className="sr-only">{srText} icon</span>
+        <div className="flex items-center">
+          <img src={logo} alt="SpeakSmart Logo" className="h-8 w-8 mr-2" />
+          <div
+            className={`inline-flex items-center justify-center shrink-0 w-8 h-8 ${textColor} ${bgColor} rounded-lg`}
+          >
+            {icon}
+            <span className="sr-only">{srText} icon</span>
+          </div>
         </div>
         <div className="ms-3 text-sm font-normal">{message}</div>
         <button

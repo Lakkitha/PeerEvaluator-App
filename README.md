@@ -1,4 +1,4 @@
-# PeerEvaluator: AI-based Public Speaking Evaluation System
+# SpeakSmart: AI-based Public Speaking Evaluation System
 
 ## Overview
 
@@ -42,11 +42,11 @@ The application is built using **React** with **Vite** and integrates **Firebase
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/PeerEvaluator-App.git
+   git clone https://github.com/your-username/SpeakSmart-App.git
    ```
 2. Navigate to the client directory:
    ```bash
-   cd PeerEvaluator-App/client
+   cd SpeakSmart-App/client
    ```
 3. Install dependencies:
    ```bash

@@ -581,15 +581,20 @@ const Navbar = () => {
     <>
       <nav className="bg-white border-gray-200 dark:bg-gray-900 fixed w-full z-20 shadow-md">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          {" "}
           <Link
             to="/"
             className="flex items-center space-x-3 rtl:space-x-reverse"
           >
+            <img
+              src="/src/assets/SpeakSmart-Logo.png"
+              alt="SpeakSmart Logo"
+              className="h-8 w-8 mr-2"
+            />
             <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-              PeerEvaluator
+              SpeakSmart
             </span>
           </Link>
-
           {/* Center the navigation items on desktop */}
           <div
             className={`items-center justify-center ${
@@ -658,7 +663,6 @@ const Navbar = () => {
               </ul>
             )}
           </div>
-
           <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
             {user ? (
               /* User dropdown button when logged in */
