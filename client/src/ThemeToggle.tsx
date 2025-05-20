@@ -62,7 +62,6 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
 
   // Get current active theme appearance (not preference)
   const isDarkMode = document.documentElement.classList.contains('dark');
-
   return (
     <button
       id="theme-toggle"
@@ -74,10 +73,10 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
       aria-label="Toggle Dark Mode"
       title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {/* Sun icon - shown in dark mode */}
+      {/* Sun icon - shows when in light mode */}
       <svg
         aria-hidden="true"
-        className={isDarkMode ? "w-5 h-5" : "hidden w-5 h-5"}
+        className={!isDarkMode ? "w-5 h-5" : "hidden w-5 h-5"}
         fill="currentColor"
         viewBox="0 0 20 20"
         xmlns="http://www.w3.org/2000/svg"
@@ -89,10 +88,10 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
         ></path>
       </svg>
 
-      {/* Moon icon - shown in light mode */}
+      {/* Moon icon - shows when in dark mode */}
       <svg
         aria-hidden="true"
-        className={!isDarkMode ? "w-5 h-5" : "hidden w-5 h-5"}
+        className={isDarkMode ? "w-5 h-5" : "hidden w-5 h-5"}
         fill="currentColor"
         viewBox="0 0 20 20"
         xmlns="http://www.w3.org/2000/svg"
