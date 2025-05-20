@@ -5,63 +5,70 @@ interface ThemeToggleProps {
 }
 
 // Create a type for themes to avoid string literals
-type Theme = 'dark' | 'light' | 'system';
+type Theme = "dark" | "light" | "system";
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
-  const [theme, setTheme] = useState<Theme>('system');
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
+  const [theme, setTheme] = useState<Theme>("system");
 
   // Initialize theme on component mount
   useEffect(() => {
     // Check localStorage for saved preference
-    const savedTheme = localStorage.getItem('color-theme') as Theme | null;
+    const savedTheme = localStorage.getItem("color-theme") as Theme | null;
 
     if (savedTheme) {
       setTheme(savedTheme);
       applyTheme(savedTheme);
     } else {
       // If no preference is saved, use system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme('system');
-      applyTheme(prefersDark ? 'dark' : 'light');
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      setTheme("system");
+      applyTheme(prefersDark ? "dark" : "light");
 
       // Listen for system theme changes
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = (e: MediaQueryListEvent) => {
-        if (theme === 'system') {
-          applyTheme(e.matches ? 'dark' : 'light');
+        if (theme === "system") {
+          applyTheme(e.matches ? "dark" : "light");
         }
       };
 
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
     }
   }, []);
 
   // Apply the selected theme
-  const applyTheme = (newTheme: Theme | 'system') => {
+  const applyTheme = (newTheme: Theme | "system") => {
     const root = document.documentElement;
 
-    if (newTheme === 'system') {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      root.classList.toggle('dark', systemPrefersDark);
+    if (newTheme === "system") {
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      root.classList.toggle("dark", systemPrefersDark);
     } else {
-      root.classList.toggle('dark', newTheme === 'dark');
+      root.classList.toggle("dark", newTheme === "dark");
     }
   };
 
   // Toggle between light and dark themes
   const toggleTheme = () => {
-    const newTheme = theme === 'light' || (theme === 'system' && !document.documentElement.classList.contains('dark'))
-      ? 'dark'
-      : 'light';
+    const newTheme =
+      theme === "light" ||
+      (theme === "system" &&
+        !document.documentElement.classList.contains("dark"))
+        ? "dark"
+        : "light";
 
     setTheme(newTheme);
     applyTheme(newTheme);
-    localStorage.setItem('color-theme', newTheme);
+    localStorage.setItem("color-theme", newTheme);
   };
 
   // Get current active theme appearance (not preference)
-  const isDarkMode = document.documentElement.classList.contains('dark');
+  const isDarkMode = document.documentElement.classList.contains("dark");
   return (
     <button
       id="theme-toggle"
