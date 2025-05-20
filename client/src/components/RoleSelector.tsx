@@ -15,14 +15,13 @@ const RoleSelector = ({ mode }: RoleSelectorProps) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        {" "}
         <h1 className="text-3xl font-bold text-center text-blue-600 dark:text-blue-400 mb-6">
-          {mode === "login" ? "Log In" : "Get Started"} with PeerEvaluator
+          {mode === "login" ? "Log In" : "Get Started"} with SpeakSmart
         </h1>
-
         <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
           Please select your role to continue
         </p>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Club Coordinator Button */}
           <button
@@ -88,7 +87,6 @@ const RoleSelector = ({ mode }: RoleSelectorProps) => {
             </div>
           </button>
         </div>
-
         <div className="flex justify-center">
           <Link
             to={
@@ -106,7 +104,6 @@ const RoleSelector = ({ mode }: RoleSelectorProps) => {
             Continue
           </Link>
         </div>
-
         <div className="mt-6 text-center">
           {mode === "login" ? (
             <p className="text-gray-600 dark:text-gray-300">

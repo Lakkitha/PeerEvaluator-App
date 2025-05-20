@@ -47,10 +47,9 @@ const Login = ({ isAdminLogin = false }: LoginProps) => {
       setLoading(false);
     }
   };
-
   const pageTitle = isAdminLogin
     ? "Log In as Club Coordinator"
-    : "Log In to PeerEvaluator";
+    : "Log In to SpeakSmart";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
