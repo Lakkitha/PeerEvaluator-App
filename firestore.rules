@@ -1,7 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    // Helper functions for role checks
+  match /databases/{database}/documents {    // Helper functions for role checks
     function isSignedIn() {
       return request.auth != null;
     }
@@ -12,10 +11,6 @@ service cloud.firestore {
 
     function isClubAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/Club_Admins/$(request.auth.uid));
-    }
-
-    function getUserClubId(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data.clubID;
     }
 
     function getAdminClubId() {
@@ -64,17 +59,15 @@ service cloud.firestore {
       allow create: if request.auth.uid == adminId || isWebAdmin();
       allow update: if request.auth.uid == adminId;
       allow delete: if isWebAdmin() && request.auth.uid != adminId; // Cannot delete self
-    }
-
-    // Evaluations data access rules - Expanded for Club Admins
+    }    // Evaluations data access rules - Expanded for Club Admins
     match /evaluations/{evaluationId} {
-      // Simplified rules - remove the complex query that was causing errors
+      // Simplified rules with improved club admin access
       allow read: if isSignedIn() && (
         resource.data.userId == request.auth.uid || // User's own evaluations
         isWebAdmin() || // Web admins can read all evaluations
-        (isClubAdmin() &&
-          resource.data.clubID == getAdminClubId() // Evaluations from the admin's club
-        )
+        (isClubAdmin() && (resource.data.clubID == getAdminClubId() ||
+                           (exists(/databases/$(database)/documents/users/$(resource.data.userId)) &&
+                            get(/databases/$(database)/documents/users/$(resource.data.userId)).data.clubID == getAdminClubId())))
       );
 
       allow create: if isSignedIn();

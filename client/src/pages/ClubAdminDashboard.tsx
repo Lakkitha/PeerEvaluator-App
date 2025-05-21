@@ -9,7 +9,6 @@ import {
   getClubById,
   getClubMembers,
 } from "../services/firebase";
-import { handleFirebaseError } from "../utils/firebaseErrorHandler";
 
 interface UnverifiedUser {
   id: string;
@@ -119,23 +118,21 @@ const ClubAdminDashboard = () => {
         const users = await getUnverifiedUsers();
         setUnverifiedUsers(users);
         setNotificationCount(users.length);
-
         const evaluations = await getEvaluationsForClub(adminData.clubID);
         setRecentEvaluations(
           evaluations.slice(0, 5).map((evaluation) => ({
             id: evaluation.id,
             userId: evaluation.userId,
             username: evaluation.username || "Unknown User",
-            date: evaluation.date,
+            date: evaluation.date || new Date().toISOString(),
             scores: {
-              overallImpact: evaluation.scores.overallImpact,
+              overallImpact: evaluation.scores?.overallImpact || 0,
             },
           }))
         );
-
         if (adminData.clubID) {
           const members = await getClubMembers(adminData.clubID);
-          setClubMembers(members);
+          setClubMembers(members.filter((member) => member !== null));
         }
 
         setScheduledEvaluations([

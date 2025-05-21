@@ -9,6 +9,7 @@ export interface User {
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  joinedDate?: string; // Alias for createdAt used in some components
 }
 
 export interface Club {
@@ -16,6 +17,7 @@ export interface Club {
   clubAdminID: string;
   createdAt: string;
   updatedAt: string;
+  id?: string; // Optional id for frontend use
 }
 
 export interface ClubAdmin {
