@@ -41,8 +41,7 @@ const ProgressChart = ({
   const [chartData, setChartData] = useState<ChartDataType | null>(null);
   const [activeTimeframe, setActiveTimeframe] = useState(timeframe);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Calculate average scores for the top metrics display
+  // Calculate average scores for all metrics display
   const calculateAverages = () => {
     if (!evaluations || !evaluations.length) return {};
 
@@ -50,16 +49,34 @@ const ProgressChart = ({
       (acc, evaluation) => {
         return {
           clarity: acc.clarity + (evaluation.scores.clarity || 0),
+          coherence: acc.coherence + (evaluation.scores.coherence || 0),
+          delivery: acc.delivery + (evaluation.scores.delivery || 0),
+          vocabulary: acc.vocabulary + (evaluation.scores.vocabulary || 0),
           overallImpact:
             acc.overallImpact + (evaluation.scores.overallImpact || 0),
+          fluency: acc.fluency + (evaluation.scores.fluency || 0),
+          engagement: acc.engagement + (evaluation.scores.engagement || 0),
         };
       },
-      { clarity: 0, overallImpact: 0 }
+      {
+        clarity: 0,
+        coherence: 0,
+        delivery: 0,
+        vocabulary: 0,
+        overallImpact: 0,
+        fluency: 0,
+        engagement: 0,
+      }
     );
 
     return {
       clarity: (totals.clarity / evaluations.length).toFixed(1),
+      coherence: (totals.coherence / evaluations.length).toFixed(1),
+      delivery: (totals.delivery / evaluations.length).toFixed(1),
+      vocabulary: (totals.vocabulary / evaluations.length).toFixed(1),
       overallImpact: (totals.overallImpact / evaluations.length).toFixed(1),
+      fluency: (totals.fluency / evaluations.length).toFixed(1),
+      engagement: (totals.engagement / evaluations.length).toFixed(1),
     };
   };
 
@@ -106,15 +123,33 @@ const ProgressChart = ({
     ],
     []
   );
-
   useEffect(() => {
     if (!evaluations || !evaluations.length) return;
 
     // Set active timeframe when prop changes
-    setActiveTimeframe(timeframe);
+    setActiveTimeframe(timeframe); // Filter evaluations based on timeframe
+    const now = new Date();
+    let filteredEvals = [...evaluations];
+
+    if (activeTimeframe === "week") {
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      filteredEvals = evaluations.filter(
+        (evaluation) => new Date(evaluation.date) >= oneWeekAgo
+      );
+    } else if (activeTimeframe === "month") {
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      filteredEvals = evaluations.filter(
+        (evaluation) => new Date(evaluation.date) >= oneMonthAgo
+      );
+    } else if (activeTimeframe === "year") {
+      const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      filteredEvals = evaluations.filter(
+        (evaluation) => new Date(evaluation.date) >= threeMonthsAgo
+      );
+    }
 
     // Sort evaluations by date
-    const sortedEvals = [...evaluations].sort(
+    const sortedEvals = [...filteredEvals].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
@@ -123,8 +158,8 @@ const ProgressChart = ({
       new Date(evaluation.date).toLocaleDateString()
     );
 
-    // Determine which metrics to show
-    const metricsToShow = allMetrics ? availableMetrics : selectedMetrics;
+    // Determine which metrics to show - always use all metrics
+    const metricsToShow = availableMetrics;
 
     // Create series data for each selected metric
     const series = metricsToShow.map((metric) => ({
@@ -203,10 +238,9 @@ const ProgressChart = ({
       legend: {
         position: "top",
         horizontalAlign: "center",
-        fontSize: "14px",
+        fontSize: "14px", // Use a simpler marker config that matches the type
         markers: {
-          radius: 8,
-          // Remove height property
+          size: 8,
         },
         itemMargin: {
           horizontal: 10,
@@ -223,6 +257,7 @@ const ProgressChart = ({
     availableMetrics,
     metricColors,
     metricLabels,
+    activeTimeframe,
   ]);
 
   if (!chartData || evaluations.length === 0) {
@@ -240,7 +275,7 @@ const ProgressChart = ({
   return (
     <div className="max-w-full w-full bg-white rounded-lg shadow-sm dark:bg-gray-800 p-4 md:p-6">
       <div className="flex justify-between mb-5">
-        <div className="grid gap-4 grid-cols-2">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           <div>
             <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
               Clarity
@@ -262,6 +297,71 @@ const ProgressChart = ({
           </div>
           <div>
             <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Coherence
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Coherence Score
+                    </h3>
+                    <p>
+                      How well-structured and logically connected the speech
+                      was.
+                    </p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.coherence}/10
+            </p>
+          </div>
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Delivery
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Delivery Score
+                    </h3>
+                    <p>
+                      The manner and effectiveness of how the speech was
+                      delivered.
+                    </p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.delivery}/10
+            </p>
+          </div>
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Vocabulary
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Vocabulary Score
+                    </h3>
+                    <p>
+                      The range and appropriateness of words used in the speech.
+                    </p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.vocabulary}/10
+            </p>
+          </div>{" "}
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
               Overall Impact
               <span className="relative group">
                 <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
@@ -279,6 +379,50 @@ const ProgressChart = ({
               {averages.overallImpact}/10
             </p>
           </div>
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Fluency
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Fluency Score
+                    </h3>
+                    <p>
+                      The smoothness and flow of speech without awkward pauses
+                      or hesitations.
+                    </p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.fluency}/10
+            </p>
+          </div>
+          <div>
+            <h5 className="inline-flex items-center text-gray-500 dark:text-gray-400 leading-none font-normal mb-2">
+              Engagement
+              <span className="relative group">
+                <InformationCircleIcon className="w-3 h-3 text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer ms-1" />
+                <div className="absolute z-10 invisible group-hover:visible inline-block text-sm text-gray-500 bg-white border border-gray-200 rounded-lg shadow-xs w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Engagement Score
+                    </h3>
+                    <p>
+                      How well the speech captivates and maintains the
+                      audience's attention.
+                    </p>
+                  </div>
+                </div>
+              </span>
+            </h5>
+            <p className="text-gray-900 dark:text-white text-2xl leading-none font-bold">
+              {averages.engagement}/10
+            </p>
+          </div>
         </div>
         <div className="relative">
           <button
@@ -286,12 +430,13 @@ const ProgressChart = ({
             type="button"
             className="px-3 py-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
           >
-            {timeframe === "week"
-              ? "Last week"
-              : timeframe === "month"
-              ? "Last month"
-              : timeframe === "year"
-              ? "Last year"
+            {" "}
+            {activeTimeframe === "week"
+              ? "Last 7 days"
+              : activeTimeframe === "month"
+              ? "Last 30 days"
+              : activeTimeframe === "year"
+              ? "Last 90 days"
               : "All time"}
             <svg
               className="w-2.5 h-2.5 ms-2.5"
