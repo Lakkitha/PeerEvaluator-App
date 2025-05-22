@@ -595,7 +595,7 @@ const Navbar = () => {
               SpeakSmart
             </span>
           </Link>
-          {/* Center the navigation items on desktop */}
+          {/* Center the navigation items on desktop */}{" "}
           <div
             className={`items-center justify-center ${
               isMobileMenuOpen ? "block" : "hidden"
@@ -618,48 +618,79 @@ const Navbar = () => {
                     Home
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to="/evaluate"
-                    className={`block py-2 px-3 text-center rounded md:p-0 ${
-                      isActive("/evaluate")
-                        ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
-                        : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                    }`}
-                    aria-current={isActive("/evaluate") ? "page" : undefined}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Evaluation
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/dashboard"
-                    className={`block py-2 px-3 text-center rounded md:p-0 ${
-                      isActive("/dashboard")
-                        ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
-                        : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                    }`}
-                    aria-current={isActive("/dashboard") ? "page" : undefined}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/progress"
-                    className={`block py-2 px-3 text-center rounded md:p-0 ${
-                      isActive("/progress")
-                        ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
-                        : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                    }`}
-                    aria-current={isActive("/progress") ? "page" : undefined}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Progress
-                  </Link>
-                </li>
+
+                {/* Show different menu items based on user role */}
+                {isClubAdmin ? (
+                  // Club coordinator menu items
+                  <li>
+                    <Link
+                      to="/admin/dashboard"
+                      className={`block py-2 px-3 text-center rounded md:p-0 ${
+                        isActive("/admin/dashboard")
+                          ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                          : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                      }`}
+                      aria-current={
+                        isActive("/admin/dashboard") ? "page" : undefined
+                      }
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Club Dashboard
+                    </Link>
+                  </li>
+                ) : (
+                  // Regular member menu items
+                  <>
+                    <li>
+                      <Link
+                        to="/evaluate"
+                        className={`block py-2 px-3 text-center rounded md:p-0 ${
+                          isActive("/evaluate")
+                            ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                            : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                        }`}
+                        aria-current={
+                          isActive("/evaluate") ? "page" : undefined
+                        }
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Evaluation
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/dashboard"
+                        className={`block py-2 px-3 text-center rounded md:p-0 ${
+                          isActive("/dashboard")
+                            ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                            : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                        }`}
+                        aria-current={
+                          isActive("/dashboard") ? "page" : undefined
+                        }
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/progress"
+                        className={`block py-2 px-3 text-center rounded md:p-0 ${
+                          isActive("/progress")
+                            ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                            : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                        }`}
+                        aria-current={
+                          isActive("/progress") ? "page" : undefined
+                        }
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Progress
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             )}
           </div>
@@ -726,17 +757,19 @@ const Navbar = () => {
                           <hr className="my-1 border-gray-200 dark:border-gray-600" />
                         </li>
                       </>
+                    )}{" "}
+                    {/* Show Dashboard link only for regular members */}
+                    {!isClubAdmin && (
+                      <li>
+                        <Link
+                          to="/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                      </li>
                     )}
-
-                    <li>
-                      <Link
-                        to="/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                        onClick={() => setIsUserDropdownOpen(false)}
-                      >
-                        Dashboard
-                      </Link>
-                    </li>
                     <li>
                       <Link
                         to="/settings"
@@ -778,7 +811,7 @@ const Navbar = () => {
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                             onClick={() => setIsUserDropdownOpen(false)}
                           >
-                            Club Admin
+                            Club Dashboard
                           </Link>
                         </li>
                         <li>

@@ -239,22 +239,20 @@ const ClubAdminDashboard = () => {
       member.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
-
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 dark:text-white">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-center">
+        <h1 className="text-3xl font-bold text-center dark:text-white">
           Club Coordinator Dashboard
           {clubData && (
-            <span className="block text-xl font-normal mt-2 text-gray-600">
+            <span className="block text-xl font-normal mt-2 text-gray-600 dark:text-gray-300">
               {clubData.name}
             </span>
           )}
@@ -262,9 +260,9 @@ const ClubAdminDashboard = () => {
 
         <div className="flex items-center">
           <div className="relative mr-4">
-            <button className="p-2 rounded-full bg-gray-200 hover:bg-gray-300">
+            <button className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
               <svg
-                className="w-6 h-6"
+                className="w-6 h-6 dark:text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -293,19 +291,17 @@ const ClubAdminDashboard = () => {
           </button>
         </div>
       </div>
-
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-
-      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+      <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
         <button
           className={`py-2 px-4 font-medium whitespace-nowrap ${
             activeTab === "overview"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
           onClick={() => setActiveTab("overview")}
         >
@@ -314,8 +310,8 @@ const ClubAdminDashboard = () => {
         <button
           className={`py-2 px-4 font-medium whitespace-nowrap ${
             activeTab === "members"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
           onClick={() => setActiveTab("members")}
         >
@@ -324,8 +320,8 @@ const ClubAdminDashboard = () => {
         <button
           className={`py-2 px-4 font-medium whitespace-nowrap ${
             activeTab === "evaluations"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
           onClick={() => setActiveTab("evaluations")}
         >
@@ -334,8 +330,8 @@ const ClubAdminDashboard = () => {
         <button
           className={`py-2 px-4 font-medium whitespace-nowrap ${
             activeTab === "schedule"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
           onClick={() => setActiveTab("schedule")}
         >
@@ -344,44 +340,47 @@ const ClubAdminDashboard = () => {
         <button
           className={`py-2 px-4 font-medium whitespace-nowrap ${
             activeTab === "reports"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-700"
+              ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
           onClick={() => setActiveTab("reports")}
         >
           Reports
         </button>
       </div>
-
       {activeTab === "overview" && (
         <div className="grid gap-8 grid-cols-1">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Unverified Users</h2>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">
+              Unverified Users
+            </h2>
 
             {unverifiedUsers.length === 0 ? (
-              <p className="text-gray-600">No unverified users at this time.</p>
+              <p className="text-gray-600 dark:text-gray-300">
+                No unverified users at this time.
+              </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Joined
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {unverifiedUsers.map((user) => (
-                      <tr key={user.id}>
+                      <tr key={user.id} className="dark:text-white">
                         <td className="px-6 py-4 whitespace-nowrap">
                           {user.username}
                         </td>
@@ -394,13 +393,13 @@ const ClubAdminDashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button
                             onClick={() => handleVerifyUser(user.id)}
-                            className="text-green-600 hover:text-green-900 mr-4"
+                            className="text-green-500 hover:text-green-400 mr-4"
                           >
                             Verify
                           </button>
                           <button
                             onClick={() => handleRejectUser(user.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-500 hover:text-red-400"
                           >
                             Reject
                           </button>
@@ -413,43 +412,45 @@ const ClubAdminDashboard = () => {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Recent Evaluations</h2>
+              <h2 className="text-xl font-bold dark:text-white">
+                Recent Evaluations
+              </h2>
               <button
                 onClick={() => setActiveTab("evaluations")}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 View All
               </button>
             </div>
 
             {recentEvaluations.length === 0 ? (
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 No evaluations recorded for your club yet.
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         User
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Overall Score
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {recentEvaluations.map((evaluation) => (
-                      <tr key={evaluation.id}>
+                      <tr key={evaluation.id} className="dark:text-white">
                         <td className="px-6 py-4 whitespace-nowrap">
                           {evaluation.username}
                         </td>
@@ -464,7 +465,7 @@ const ClubAdminDashboard = () => {
                             onClick={() =>
                               navigate(`/evaluation/${evaluation.id}`)
                             }
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                           >
                             View Details
                           </button>
@@ -477,43 +478,45 @@ const ClubAdminDashboard = () => {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Upcoming Evaluations</h2>
+              <h2 className="text-xl font-bold dark:text-white">
+                Upcoming Evaluations
+              </h2>
               <button
                 onClick={() => setActiveTab("schedule")}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 View Schedule
               </button>
             </div>
 
             {scheduledEvaluations.length === 0 ? (
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 No upcoming evaluations scheduled.
               </p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Title
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Speaker
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Evaluator
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {scheduledEvaluations.map((scheduledEval) => (
-                      <tr key={scheduledEval.id}>
+                      <tr key={scheduledEval.id} className="dark:text-white">
                         <td className="px-6 py-4 whitespace-nowrap">
                           {scheduledEval.title}
                         </td>
@@ -536,17 +539,16 @@ const ClubAdminDashboard = () => {
             )}
           </div>
         </div>
-      )}
-
+      )}{" "}
       {activeTab === "members" && (
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Club Members</h2>
+            <h2 className="text-xl font-bold dark:text-white">Club Members</h2>
             <div className="relative">
               <input
                 type="text"
                 placeholder="Search members..."
-                className="px-4 py-2 border border-gray-300 rounded-md"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -568,32 +570,34 @@ const ClubAdminDashboard = () => {
           </div>
 
           {filteredMembers.length === 0 ? (
-            <p className="text-gray-600">No members in your club yet.</p>
+            <p className="text-gray-600 dark:text-gray-300">
+              No members in your club yet.
+            </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Joined Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Evaluations
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredMembers.map((member) => (
-                    <tr key={member.id}>
+                    <tr key={member.id} className="dark:text-white">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {member.username}
                       </td>
@@ -609,11 +613,11 @@ const ClubAdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           to={`/admin/member-progress/${member.id}`}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
+                          className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
                         >
                           View Progress
                         </Link>
-                        <button className="text-orange-600 hover:text-orange-900">
+                        <button className="text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300">
                           Send Message
                         </button>
                       </td>
@@ -624,38 +628,39 @@ const ClubAdminDashboard = () => {
             </div>
           )}
         </div>
-      )}
-
+      )}{" "}
       {activeTab === "evaluations" && (
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-6">All Evaluations</h2>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-6 dark:text-white">
+            All Evaluations
+          </h2>
 
           {recentEvaluations.length === 0 ? (
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               No evaluations recorded for your club yet.
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Overall Score
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {recentEvaluations.map((evaluation) => (
-                    <tr key={evaluation.id}>
+                    <tr key={evaluation.id} className="dark:text-white">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {evaluation.username}
                       </td>
@@ -670,7 +675,7 @@ const ClubAdminDashboard = () => {
                           onClick={() =>
                             navigate(`/evaluation/${evaluation.id}`)
                           }
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           View Details
                         </button>
@@ -682,12 +687,13 @@ const ClubAdminDashboard = () => {
             </div>
           )}
         </div>
-      )}
-
+      )}{" "}
       {activeTab === "schedule" && (
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Evaluation Schedule</h2>
+            <h2 className="text-xl font-bold dark:text-white">
+              Evaluation Schedule
+            </h2>
             <button
               onClick={() => setShowScheduleModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200"
@@ -697,35 +703,37 @@ const ClubAdminDashboard = () => {
           </div>
 
           {scheduledEvaluations.length === 0 ? (
-            <p className="text-gray-600">No evaluations scheduled.</p>
+            <p className="text-gray-600 dark:text-gray-300">
+              No evaluations scheduled.
+            </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Title
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Speaker
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Evaluator
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {scheduledEvaluations.map((scheduledEval) => (
-                    <tr key={scheduledEval.id}>
+                    <tr key={scheduledEval.id} className="dark:text-white">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {scheduledEval.title}
                       </td>
@@ -745,10 +753,10 @@ const ClubAdminDashboard = () => {
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                           ${
                             scheduledEval.status === "scheduled"
-                              ? "bg-yellow-100 text-yellow-800"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                               : scheduledEval.status === "completed"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                           }`}
                         >
                           {scheduledEval.status.charAt(0).toUpperCase() +
@@ -756,7 +764,7 @@ const ClubAdminDashboard = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="text-red-600 hover:text-red-900">
+                        <button className="text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300">
                           Cancel
                         </button>
                       </td>
@@ -767,18 +775,19 @@ const ClubAdminDashboard = () => {
             </div>
           )}
         </div>
-      )}
-
+      )}{" "}
       {activeTab === "reports" && (
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-6">Club Reports</h2>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-6 dark:text-white">
+            Club Reports
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-gray-200 p-6 rounded-lg hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold mb-2">
+            <div className="border border-gray-200 dark:border-gray-700 p-6 rounded-lg hover:shadow-md transition-shadow dark:bg-gray-800">
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">
                 Member Progress Report
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Generate a comprehensive report of all members' progress and
                 evaluation history.
               </p>
@@ -790,11 +799,11 @@ const ClubAdminDashboard = () => {
               </button>
             </div>
 
-            <div className="border border-gray-200 p-6 rounded-lg hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold mb-2">
+            <div className="border border-gray-200 dark:border-gray-700 p-6 rounded-lg hover:shadow-md transition-shadow dark:bg-gray-800">
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">
                 Club Performance Summary
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 View club-wide metrics and performance trends over time.
               </p>
               <button
@@ -805,9 +814,11 @@ const ClubAdminDashboard = () => {
               </button>
             </div>
 
-            <div className="border border-gray-200 p-6 rounded-lg hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold mb-2">Attendance Report</h3>
-              <p className="text-gray-600 mb-4">
+            <div className="border border-gray-200 dark:border-gray-700 p-6 rounded-lg hover:shadow-md transition-shadow dark:bg-gray-800">
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">
+                Attendance Report
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Track member attendance and participation in club activities.
               </p>
               <button
@@ -818,9 +829,11 @@ const ClubAdminDashboard = () => {
               </button>
             </div>
 
-            <div className="border border-gray-200 p-6 rounded-lg hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold mb-2">Evaluation Metrics</h3>
-              <p className="text-gray-600 mb-4">
+            <div className="border border-gray-200 dark:border-gray-700 p-6 rounded-lg hover:shadow-md transition-shadow dark:bg-gray-800">
+              <h3 className="text-lg font-semibold mb-2 dark:text-white">
+                Evaluation Metrics
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Analyze evaluation scores and feedback patterns across the club.
               </p>
               <button
@@ -832,16 +845,17 @@ const ClubAdminDashboard = () => {
             </div>
           </div>
         </div>
-      )}
-
+      )}{" "}
       {showSettingsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-lg">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Club Settings</h3>
+              <h3 className="text-xl font-bold dark:text-white">
+                Club Settings
+              </h3>
               <button
                 onClick={() => setShowSettingsModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
               >
                 <svg
                   className="w-6 h-6"
@@ -862,11 +876,11 @@ const ClubAdminDashboard = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Meeting Day
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={clubSettings.meetingDay}
                   onChange={(e) =>
                     setClubSettings({
@@ -892,12 +906,12 @@ const ClubAdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Meeting Time
                 </label>
                 <input
                   type="time"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={clubSettings.meetingTime}
                   onChange={(e) =>
                     setClubSettings({
@@ -909,12 +923,12 @@ const ClubAdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Meeting Location
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={clubSettings.meetingLocation}
                   onChange={(e) =>
                     setClubSettings({
@@ -936,18 +950,18 @@ const ClubAdminDashboard = () => {
                       allowGuestEvaluations: e.target.checked,
                     })
                   }
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                 />
                 <label
                   htmlFor="allowGuestEvaluations"
-                  className="ml-2 block text-sm text-gray-900"
+                  className="ml-2 block text-sm text-gray-900 dark:text-gray-200"
                 >
                   Allow guest evaluations
                 </label>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Evaluation Categories
                 </label>
                 <div className="space-y-2">
@@ -955,7 +969,7 @@ const ClubAdminDashboard = () => {
                     <div key={index} className="flex items-center">
                       <input
                         type="text"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                         value={category}
                         onChange={(e) => {
                           const updatedCategories = [
@@ -979,7 +993,7 @@ const ClubAdminDashboard = () => {
                             evaluationCategories: updatedCategories,
                           });
                         }}
-                        className="ml-2 text-red-600 hover:text-red-800"
+                        className="ml-2 text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300"
                       >
                         <svg
                           className="w-5 h-5"
@@ -1009,7 +1023,7 @@ const ClubAdminDashboard = () => {
                       ],
                     });
                   }}
-                  className="mt-2 text-blue-600 hover:text-blue-800 flex items-center"
+                  className="mt-2 text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
                 >
                   <svg
                     className="w-4 h-4 mr-1"
@@ -1033,7 +1047,7 @@ const ClubAdminDashboard = () => {
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setShowSettingsModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
@@ -1046,16 +1060,17 @@ const ClubAdminDashboard = () => {
             </div>
           </div>
         </div>
-      )}
-
+      )}{" "}
       {showScheduleModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-lg">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg w-full max-w-lg">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Schedule New Evaluation</h3>
+              <h3 className="text-xl font-bold dark:text-white">
+                Schedule New Evaluation
+              </h3>
               <button
                 onClick={() => setShowScheduleModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
               >
                 <svg
                   className="w-6 h-6"
@@ -1076,12 +1091,12 @@ const ClubAdminDashboard = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Evaluation Title
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={newEvaluation.title}
                   onChange={(e) =>
                     setNewEvaluation({
@@ -1094,12 +1109,12 @@ const ClubAdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Date
                 </label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={newEvaluation.scheduledDate}
                   onChange={(e) =>
                     setNewEvaluation({
@@ -1111,11 +1126,11 @@ const ClubAdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Speaker
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={newEvaluation.speakerId}
                   onChange={(e) =>
                     setNewEvaluation({
@@ -1134,11 +1149,11 @@ const ClubAdminDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Evaluator
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                   value={newEvaluation.evaluatorId}
                   onChange={(e) =>
                     setNewEvaluation({
@@ -1160,7 +1175,7 @@ const ClubAdminDashboard = () => {
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setShowScheduleModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
