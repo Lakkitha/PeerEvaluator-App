@@ -66,8 +66,10 @@ export async function getUserClub() {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      console.log("User document does not exist, may need to create one");
-      // Return null instead of throwing an error
+      console.log("User document does not exist, creating one");
+      // Create user document if it doesn't exist
+      await ensureUserDocument(auth.currentUser.uid);
+      // Return null since the new user won't have a club yet
       return null;
     }
 
@@ -369,16 +371,60 @@ export async function getEvaluationsForClub(clubId: string) {
       throw new Error("You can only view evaluations for your own club");
     }
 
-    const evaluationsQuery = query(
-      collection(db, "evaluations"),
-      where("clubID", "==", clubId)
-    );
+    // First try with specific clubID query
+    try {
+      const evaluationsQuery = query(
+        collection(db, "evaluations"),
+        where("clubID", "==", clubId)
+      );
 
-    const querySnapshot = await getDocs(evaluationsQuery);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Evaluation),
-    }));
+      const querySnapshot = await getDocs(evaluationsQuery);
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Evaluation),
+      }));
+    } catch (directQueryError) {
+      console.warn(
+        "Error with direct clubID query, falling back to user-based approach:",
+        directQueryError
+      );
+
+      // Fallback: Get users in this club first
+      const usersQuery = query(
+        collection(db, "users"),
+        where("clubID", "==", clubId)
+      );
+
+      const usersSnapshot = await getDocs(usersQuery);
+
+      // Get evaluations for each user in the club
+      const allEvaluations: Array<Evaluation & { id: string }> = [];
+
+      for (const userDoc of usersSnapshot.docs) {
+        try {
+          const userEvalQuery = query(
+            collection(db, "evaluations"),
+            where("userId", "==", userDoc.id)
+          );
+
+          const evalSnapshot = await getDocs(userEvalQuery);
+
+          evalSnapshot.docs.forEach((evalDoc) => {
+            allEvaluations.push({
+              id: evalDoc.id,
+              ...(evalDoc.data() as Evaluation),
+            });
+          });
+        } catch {
+          // Ignore errors and continue to next user
+          console.log(
+            `Couldn't access evaluations for club member ${userDoc.id}`
+          );
+        }
+      }
+
+      return allEvaluations;
+    }
   } catch (error) {
     console.error("Error fetching evaluations for club:", error);
     // Return an empty array instead of throwing to prevent dashboard errors
@@ -394,9 +440,12 @@ export async function getCurrentUserEvaluations() {
 
   try {
     return await getEvaluationsForUser(auth.currentUser.uid);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check if it's an index error
-    if (error?.message?.includes("The query requires an index")) {
+    if (
+      error instanceof Error &&
+      error.message.includes("The query requires an index")
+    ) {
       console.warn(
         "Missing Firestore index. Please visit the URL in the error message to create it.",
         error
@@ -432,12 +481,32 @@ export async function updateUserProfilePicture(photoURL: string) {
 
 // Add this function
 export async function getClubById(clubId: string) {
-  const clubDoc = await getDoc(doc(db, "clubs", clubId));
-  if (!clubDoc.exists()) {
-    throw new Error("Club not found");
-  }
+  try {
+    const clubDoc = await getDoc(doc(db, "clubs", clubId));
+    if (!clubDoc.exists()) {
+      console.log(`Club with ID ${clubId} not found, returning default club`);
+      // Return a default club instead of throwing an error
+      return {
+        id: clubId,
+        clubName: "Unknown Club",
+        clubAdminID: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
 
-  return { id: clubDoc.id, ...(clubDoc.data() as Club) };
+    return { id: clubDoc.id, ...(clubDoc.data() as Club) };
+  } catch (error) {
+    console.error(`Error fetching club with ID ${clubId}:`, error);
+    // Return a default club instead of throwing
+    return {
+      id: clubId,
+      clubName: "Error Loading Club",
+      clubAdminID: "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
 }
 
 // Add this function
@@ -577,39 +646,56 @@ export async function getClubMembers(clubId: string) {
 
     // For each user, get their evaluation count
     const memberPromises = querySnapshot.docs.map(async (doc) => {
-      const userData = doc.data();
-
-      // Get evaluation count safely - handle permissions errors
-      let evaluationCount = 0;
       try {
-        // Count evaluations
-        const evaluationsQuery = query(
-          collection(db, "evaluations"),
-          where("userId", "==", doc.id)
-        );
-        const evaluationSnapshot = await getDocs(evaluationsQuery);
-        evaluationCount = evaluationSnapshot.size;
-      } catch (evalError) {
-        // Don't log permission errors in production
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `Couldn't access evaluations for user ${doc.id} (this is normal if permissions are limited)`
-          );
-        }
-        evaluationCount = 0; // Default to 0 if there's a permission error
-      }
+        const userData = doc.data();
 
-      return {
-        id: doc.id,
-        username: userData.username || "Unknown User",
-        email: userData.email,
-        isVerified: userData.isVerified,
-        joinedDate: userData.createdAt,
-        evaluationCount: evaluationCount,
-      };
+        // Get evaluation count safely - handle permissions errors
+        let evaluationCount = 0;
+        try {
+          // Count evaluations with clubID filter
+          const evaluationsQuery = query(
+            collection(db, "evaluations"),
+            where("userId", "==", doc.id),
+            where("clubID", "==", clubId)
+          );
+          const evaluationSnapshot = await getDocs(evaluationsQuery);
+          evaluationCount = evaluationSnapshot.size;
+        } catch (evalError) {
+          // Don't log permission errors in production
+          if (process.env.NODE_ENV === "development") {
+            console.log(
+              `Couldn't access evaluations for user ${doc.id} (this is normal if permissions are limited)`,
+              evalError
+            );
+          }
+          evaluationCount = 0; // Default to 0 if there's a permission error
+        }
+
+        return {
+          id: doc.id,
+          username: userData.username || "Unknown User",
+          email: userData.email || "unknown@example.com",
+          isVerified: userData.isVerified || false,
+          joinedDate: userData.createdAt || new Date().toISOString(),
+          evaluationCount: evaluationCount,
+        };
+      } catch (userError) {
+        console.error(`Error processing user ${doc.id}:`, userError);
+        // Return a default user object instead of failing the whole operation
+        return {
+          id: doc.id,
+          username: "Unknown User",
+          email: "unknown@example.com",
+          isVerified: true,
+          joinedDate: new Date().toISOString(),
+          evaluationCount: 0,
+        };
+      }
     });
 
-    return Promise.all(memberPromises);
+    // Filter out any null results (in case of rejected promises)
+    const results = await Promise.all(memberPromises);
+    return results.filter((member) => member !== null);
   } catch (error) {
     console.error("Error getting club members:", error);
     // Return empty array instead of throwing
@@ -619,20 +705,42 @@ export async function getClubMembers(clubId: string) {
 
 export async function getUserDetails(userId: string) {
   // Get the user document
-  const userDoc = await getDoc(doc(db, "users", userId));
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
 
-  if (!userDoc.exists()) {
-    throw new Error("User not found");
+    if (!userDoc.exists()) {
+      console.log(
+        `User document does not exist for ID: ${userId}, returning default user`
+      );
+      // Return a default user object instead of throwing an error
+      return {
+        username: "Unknown User",
+        email: "unknown@example.com",
+        clubID: null,
+        isVerified: false,
+        joinedDate: new Date().toISOString(),
+      };
+    }
+
+    const userData = userDoc.data();
+    return {
+      username: userData.username || "Unknown User",
+      email: userData.email || "unknown@example.com",
+      clubID: userData.clubID || null,
+      isVerified: userData.isVerified || false,
+      joinedDate: userData.createdAt || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error(`Error fetching user details for user ${userId}:`, error);
+    // Return a default user object instead of throwing
+    return {
+      username: "Error User",
+      email: "error@example.com",
+      clubID: null,
+      isVerified: false,
+      joinedDate: new Date().toISOString(),
+    };
   }
-
-  const userData = userDoc.data();
-  return {
-    username: userData.username,
-    email: userData.email,
-    clubID: userData.clubID,
-    isVerified: userData.isVerified,
-    joinedDate: userData.createdAt,
-  };
 }
 
 // Add this function to your services/firebase.ts file
@@ -799,16 +907,37 @@ export async function saveEvaluation(evaluation: {
   }
 
   try {
-    // Get the current user to fetch additional info
-    const user = await getCurrentUser();
+    // First ensure user document exists
+    const userData = await ensureUserDocument(auth.currentUser.uid);
+
+    let clubID = "";
+
+    if (userData) {
+      // Use the clubID from the existing user document
+      clubID = userData.clubID || "";
+    } else {
+      // Fallback: try to get the club ID directly from Firestore
+      try {
+        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (userDoc.exists()) {
+          clubID = userDoc.data().clubID || "";
+        }
+      } catch (clubError) {
+        console.log("Error getting club ID:", clubError);
+      }
+    }
+
+    const username =
+      auth.currentUser.displayName ||
+      (userData ? userData.username : "Anonymous User");
+
     const now = new Date().toISOString();
 
     // Prepare the evaluation object with user data
     const evaluationData = {
       userId: auth.currentUser.uid,
-      username:
-        user.username || auth.currentUser.displayName || "Anonymous User",
-      clubID: user.clubID || "",
+      username: username,
+      clubID: clubID, // Always include clubID, even if empty
       transcript: evaluation.transcript,
       scores: evaluation.scores,
       feedback: evaluation.feedback,
@@ -828,5 +957,59 @@ export async function saveEvaluation(evaluation: {
   } catch (error) {
     console.error("Error saving evaluation:", error);
     throw error;
+  }
+}
+
+// Function to ensure a user document exists
+export async function ensureUserDocument(
+  userId: string,
+  userData: Partial<User> = {}
+) {
+  try {
+    // Check if user document exists
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      console.log(`Creating missing user document for ${userId}`);
+
+      // Get auth user info
+      const authUser = auth.currentUser;
+      const now = new Date().toISOString();
+
+      // Create default user data
+      const defaultUserData: User = {
+        username: authUser?.displayName || userData.username || "New User",
+        email: authUser?.email || userData.email || "",
+        userPicture: authUser?.photoURL || "",
+        isVerified: false,
+        clubID: userData.clubID || "",
+        userLevel: userData.userLevel || "Beginner",
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      // Merge with provided data
+      const finalUserData = { ...defaultUserData, ...userData };
+
+      // Create the user document
+      await setDoc(userDocRef, finalUserData);
+
+      // Create shared data
+      await setDoc(doc(db, "sharedData", userId), {
+        userID: userId,
+        username: finalUserData.username,
+        clubID: finalUserData.clubID || "",
+        userLevel: finalUserData.userLevel,
+      });
+
+      return { ...finalUserData, id: userId };
+    }
+
+    return { ...(userDoc.data() as User), id: userId };
+  } catch (error) {
+    console.error("Error ensuring user document:", error);
+    // Don't throw, just return null
+    return null;
   }
 }
