@@ -609,7 +609,7 @@ const ClubAdminDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {member.evaluationCount}
-                      </td>
+                      </td>{" "}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           to={`/admin/member-progress/${member.id}`}
@@ -617,8 +617,16 @@ const ClubAdminDashboard = () => {
                         >
                           View Progress
                         </Link>
-                        <button className="text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300">
+                        <button
+                          onClick={() =>
+                            alert("Message functionality coming soon!")
+                          }
+                          className="text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300 flex items-center"
+                        >
                           Send Message
+                          <span className="ml-1 text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
+                            Coming Soon
+                          </span>
                         </button>
                       </td>
                     </tr>
