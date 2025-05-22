@@ -183,9 +183,12 @@ const EvaluationDetails = () => {
   const averageScore =
     scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length;
 
-  return (    <div className="container mx-auto px-4 py-8 dark:text-white">
+  return (
+    <div className="container mx-auto px-4 py-8 dark:text-white">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold dark:text-white">Speech Evaluation Details</h1>
+        <h1 className="text-3xl font-bold dark:text-white">
+          Speech Evaluation Details
+        </h1>
         <button
           onClick={handleGoBack}
           className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
@@ -193,7 +196,6 @@ const EvaluationDetails = () => {
           Go Back
         </button>
       </div>
-
       {/* Evaluation Summary Card */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
         <div className="flex justify-between items-center mb-4">
@@ -209,12 +211,17 @@ const EvaluationDetails = () => {
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {averageScore.toFixed(1)}/10
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Average Score</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Average Score
+            </div>
           </div>
         </div>
-      </div>      {/* Scores Breakdown */}
+      </div>{" "}
+      {/* Scores Breakdown */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4 dark:text-white">Performance Metrics</h3>
+        <h3 className="text-xl font-semibold mb-4 dark:text-white">
+          Performance Metrics
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {metricDefinitions.map((metric) => {
             const score =
@@ -232,23 +239,32 @@ const EvaluationDetails = () => {
             );
           })}
         </div>
-      </div>      {/* Transcript */}
+      </div>{" "}
+      {/* Transcript */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4 dark:text-white">Transcript</h3>
+        <h3 className="text-xl font-semibold mb-4 dark:text-white">
+          Transcript
+        </h3>
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <p className="whitespace-pre-wrap dark:text-gray-200">{evaluation.transcript}</p>
+          <p className="whitespace-pre-wrap dark:text-gray-200">
+            {evaluation.transcript}
+          </p>
         </div>
       </div>
-
       {/* Feedback */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4 dark:text-white">AI Feedback</h3>
+        <h3 className="text-xl font-semibold mb-4 dark:text-white">
+          AI Feedback
+        </h3>
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
           <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p className="whitespace-pre-wrap dark:text-gray-200">{evaluation.feedback}</p>
+            <p className="whitespace-pre-wrap dark:text-gray-200">
+              {evaluation.feedback}
+            </p>
           </div>
         </div>
-      </div>      {/* Action buttons for sharing or downloading */}
+      </div>{" "}
+      {/* Action buttons for sharing or downloading */}
       <div className="flex justify-end space-x-4">
         <button
           onClick={() => window.print()}
