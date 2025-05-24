@@ -171,11 +171,10 @@ const SpeechEvaluation = () => {
       description: "How well you connected with and engaged your audience",
     },
   ];
-
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+      <div className="flex justify-center items-center h-64 dark:bg-gray-900 min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -183,12 +182,12 @@ const SpeechEvaluation = () => {
   // Show verification required message
   if (verificationStatus === false) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <div className="container mx-auto px-4 py-8 dark:bg-gray-900 min-h-screen">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 dark:bg-yellow-900/30 dark:border-yellow-600">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-yellow-400"
+                className="h-5 w-5 text-yellow-400 dark:text-yellow-300"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -200,7 +199,7 @@ const SpeechEvaluation = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
                 Your account needs to be verified by your club administrator
                 before you can use the evaluation features.
               </p>
@@ -208,9 +207,9 @@ const SpeechEvaluation = () => {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">What to do next:</h2>
-          <ol className="list-decimal ml-6 space-y-2">
+        <div className="bg-white p-8 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 dark:text-white">What to do next:</h2>
+          <ol className="list-decimal ml-6 space-y-2 dark:text-gray-300">
             <li>Contact your club administrator to verify your account</li>
             <li>
               Once verified, you'll have access to all speech evaluation
@@ -222,7 +221,7 @@ const SpeechEvaluation = () => {
             </li>
           </ol>
           <div className="mt-6">
-            <a href="/home" className="text-blue-600 hover:text-blue-800">
+            <a href="/home" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
               Return to home page
             </a>
           </div>
@@ -232,20 +231,18 @@ const SpeechEvaluation = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Speech Evaluation</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="container mx-auto px-4 py-8 dark:bg-gray-900 min-h-screen">
+      <h1 className="text-3xl font-bold mb-8 text-center dark:text-white">Speech Evaluation</h1>      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 className="text-xl font-semibold mb-4">Record Your Speech</h2>
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8 dark:bg-gray-800 dark:shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 dark:text-white">Record Your Speech</h2>
             <AudioRecorder onTranscriptUpdate={handleTranscriptUpdate} />
 
             <div className="mt-6 flex justify-center">
               <button
                 onClick={handleEvaluate}
                 disabled={isEvaluating || !transcript}
-                className={`px-6 py-3 rounded bg-green-600 text-white font-medium hover:bg-green-700 focus:outline-none ${
+                className={`px-6 py-3 rounded bg-green-600 text-white font-medium hover:bg-green-700 focus:outline-none dark:bg-green-500 dark:hover:bg-green-600 ${
                   isEvaluating || !transcript
                     ? "opacity-50 cursor-not-allowed"
                     : ""
@@ -256,37 +253,35 @@ const SpeechEvaluation = () => {
             </div>
 
             {error && (
-              <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded dark:bg-red-900/50 dark:border-red-600 dark:text-red-300">
                 {error}
               </div>
             )}
           </div>
 
           {/* Progress Tracking Link Section */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Track Your Progress</h2>
+              <h2 className="text-xl font-semibold dark:text-white">Track Your Progress</h2>
               <Link
                 to="/progresstracking"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-200 dark:bg-blue-500 dark:hover:bg-blue-600"
               >
                 View Progress
               </Link>
             </div>
-            <p className="mt-3 text-gray-600">
+            <p className="mt-3 text-gray-600 dark:text-gray-300">
               {hasEvaluations
                 ? "View your speech history and track improvements over time."
                 : "Complete your first evaluation to start tracking your progress."}
             </p>
           </div>
-        </div>
-
-        <div>
+        </div>        <div>
           {transcript && !evaluationResult && (
-            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-              <h2 className="text-xl font-semibold mb-4">Transcript</h2>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="whitespace-pre-wrap">{transcript}</p>
+            <div className="bg-white p-6 rounded-lg shadow-md mb-8 dark:bg-gray-800 dark:shadow-lg">
+              <h2 className="text-xl font-semibold mb-4 dark:text-white">Transcript</h2>
+              <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                <p className="whitespace-pre-wrap dark:text-gray-300">{transcript}</p>
               </div>
             </div>
           )}
@@ -294,11 +289,11 @@ const SpeechEvaluation = () => {
           {evaluationResult && (
             <>
               {/* Scores Breakdown */}
-              <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+              <div className="bg-white p-6 rounded-lg shadow-md mb-8 dark:bg-gray-800 dark:shadow-lg">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Performance Metrics</h2>
+                  <h2 className="text-xl font-semibold dark:text-white">Performance Metrics</h2>
                   {saveStatus === "success" && (
-                    <span className="text-green-600 flex items-center">
+                    <span className="text-green-600 flex items-center dark:text-green-400">
                       <svg
                         className="w-5 h-5 mr-1"
                         fill="currentColor"
@@ -333,21 +328,21 @@ const SpeechEvaluation = () => {
               </div>
 
               {/* Transcript */}
-              <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h2 className="text-xl font-semibold mb-4">Transcript</h2>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="whitespace-pre-wrap">
+              <div className="bg-white p-6 rounded-lg shadow-md mb-8 dark:bg-gray-800 dark:shadow-lg">
+                <h2 className="text-xl font-semibold mb-4 dark:text-white">Transcript</h2>
+                <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                  <p className="whitespace-pre-wrap dark:text-gray-300">
                     {evaluationResult.transcript}
                   </p>
                 </div>
               </div>
 
               {/* AI Feedback */}
-              <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h2 className="text-xl font-semibold mb-4">AI Feedback</h2>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="prose prose-sm max-w-none">
-                    <p className="whitespace-pre-wrap">
+              <div className="bg-white p-6 rounded-lg shadow-md mb-8 dark:bg-gray-800 dark:shadow-lg">
+                <h2 className="text-xl font-semibold mb-4 dark:text-white">AI Feedback</h2>
+                <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <p className="whitespace-pre-wrap dark:text-gray-300">
                       {evaluationResult.feedback}
                     </p>
                   </div>
@@ -355,15 +350,15 @@ const SpeechEvaluation = () => {
               </div>
 
               {/* Improvement Suggestions */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-xl font-semibold mb-4">
+              <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
+                <h2 className="text-xl font-semibold mb-4 dark:text-white">
                   Suggestions for Improvement
                 </h2>
                 <ul className="space-y-2">
                   {evaluationResult.suggestions.map((suggestion, index) => (
                     <li key={index} className="flex items-start">
                       <svg
-                        className="w-5 h-5 text-blue-500 mr-2 mt-0.5"
+                        className="w-5 h-5 text-blue-500 mr-2 mt-0.5 dark:text-blue-400"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -373,7 +368,7 @@ const SpeechEvaluation = () => {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span>{suggestion}</span>
+                      <span className="dark:text-gray-300">{suggestion}</span>
                     </li>
                   ))}
                 </ul>

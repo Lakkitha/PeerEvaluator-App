@@ -171,54 +171,50 @@ const ProgressTracker = () => {
       setSelectedMetrics(["overallImpact"]);
     }
   };
-
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+      <div className="flex justify-center items-center h-64 dark:bg-gray-900 min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900/50 dark:border-red-600 dark:text-red-300">
         {error}
       </div>
     );
   }
 
   const averages = calculateAverages();
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">
+    <div className="container mx-auto px-4 py-8 dark:bg-gray-900 min-h-screen">
+      <h1 className="text-3xl font-bold mb-8 text-center dark:text-white">
         Your Speaking Progress
       </h1>
 
       {evaluations.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <h2 className="text-2xl font-semibold mb-4">No Evaluations Yet</h2>
-          <p className="mb-4">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center dark:bg-gray-800 dark:shadow-lg">
+          <h2 className="text-2xl font-semibold mb-4 dark:text-white">No Evaluations Yet</h2>          <p className="mb-4 dark:text-gray-300">
             You haven't recorded any speech evaluations yet.
           </p>
           <a
             href="/evaluate"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
           >
             Record Your First Speech
           </a>
         </div>
       ) : (
-        <>
-          {/* Controls */}
+        <>          {/* Controls */}
           <div className="mb-8">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold mb-4">Chart Options</h2>
+            <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
+              <h2 className="text-lg font-semibold mb-4 dark:text-white">Chart Options</h2>
 
               {/* Metric selection */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Select Metrics to Display
                 </label>
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -226,8 +222,8 @@ const ProgressTracker = () => {
                     onClick={toggleAllMetrics}
                     className={`px-3 py-1 rounded-full text-sm ${
                       showAllMetrics
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-800"
+                        ? "bg-blue-600 text-white dark:bg-blue-500"
+                        : "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200"
                     }`}
                   >
                     All Metrics
@@ -251,8 +247,8 @@ const ProgressTracker = () => {
                         onClick={() => toggleMetric(metric.id)}
                         className={`px-3 py-1 rounded-full text-sm ${
                           selectedMetrics.includes(metric.id)
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-200 text-gray-800"
+                            ? "bg-blue-600 text-white dark:bg-blue-500"
+                            : "bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200"
                         }`}
                       >
                         {metric.label}
@@ -264,13 +260,13 @@ const ProgressTracker = () => {
 
               {/* Timeframe selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Timeframe
                 </label>
                 <select
                   value={timeframe}
                   onChange={(e) => setTimeframe(e.target.value)}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400 dark:focus:border-blue-400"
                 >
                   <option value="all">All Time</option>
                   <option value="week">Past Week</option>
@@ -289,50 +285,46 @@ const ProgressTracker = () => {
               timeframe={timeframe}
               allMetrics={showAllMetrics}
             />
-          </div>
-
-          {/* Summary */}
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 className="text-xl font-bold mb-4">Performance Summary</h2>
+          </div>          {/* Summary */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8 dark:bg-gray-800 dark:shadow-lg">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">Performance Summary</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Clarity</h3>
-                <p className="text-2xl font-bold">
+              <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Clarity</h3>
+                <p className="text-2xl font-bold dark:text-white">
                   {averages.clarity.toFixed(1)}
                 </p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Coherence</h3>
-                <p className="text-2xl font-bold">
+              <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Coherence</h3>
+                <p className="text-2xl font-bold dark:text-white">
                   {averages.coherence.toFixed(1)}
                 </p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Delivery</h3>
-                <p className="text-2xl font-bold">
+              <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Delivery</h3>
+                <p className="text-2xl font-bold dark:text-white">
                   {averages.delivery.toFixed(1)}
                 </p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">
+              <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   Vocabulary
                 </h3>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold dark:text-white">
                   {averages.vocabulary.toFixed(1)}
                 </p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-500">Overall</h3>
-                <p className="text-2xl font-bold">
+              <div className="bg-gray-50 p-4 rounded-lg dark:bg-gray-700">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Overall</h3>
+                <p className="text-2xl font-bold dark:text-white">
                   {averages.overallImpact.toFixed(1)}
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* Recent Evaluations */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Recent Evaluations</h2>
+          </div>          {/* Recent Evaluations */}
+          <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">Recent Evaluations</h2>
             <div className="space-y-4">
               {filteredEvaluations()
                 .slice(-3)
@@ -340,24 +332,24 @@ const ProgressTracker = () => {
                 .map((evaluation, index) => (
                   <div
                     key={index}
-                    className="border border-gray-200 rounded-lg p-4"
+                    className="border border-gray-200 rounded-lg p-4 dark:border-gray-600 dark:bg-gray-700"
                   >
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-medium">
+                      <h3 className="font-medium dark:text-white">
                         Speech on{" "}
                         {new Date(evaluation.date).toLocaleDateString()}
                       </h3>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         Overall Score: {evaluation.scores.overallImpact}/10
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 line-clamp-2">
+                    <p className="text-sm text-gray-600 line-clamp-2 dark:text-gray-400">
                       {evaluation.transcript}
                     </p>
                     <div className="mt-2">
                       <button
                         onClick={() => navigate(`/evaluation/${evaluation.id}`)}
-                        className="text-blue-600 text-sm font-medium hover:text-blue-800"
+                        className="text-blue-600 text-sm font-medium hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                       >
                         View Details
                       </button>

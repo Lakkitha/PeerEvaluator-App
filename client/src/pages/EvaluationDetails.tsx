@@ -137,40 +137,37 @@ const EvaluationDetails = () => {
     // Use history to go back, or navigate to progress page if there's no history
     navigate(-1);
   };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
-
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <div className="container mx-auto px-4 py-8 min-h-screen bg-white dark:bg-gray-900">
+        <div className="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
           {error}
         </div>
         <button
           onClick={handleGoBack}
-          className="text-blue-600 hover:text-blue-800"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
         >
           Go Back
         </button>
       </div>
     );
   }
-
   if (!evaluation) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+      <div className="container mx-auto px-4 py-8 min-h-screen bg-white dark:bg-gray-900">
+        <div className="bg-yellow-100 dark:bg-yellow-900/50 border border-yellow-400 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded mb-4">
           No evaluation data found.
         </div>
         <button
           onClick={handleGoBack}
-          className="text-blue-600 hover:text-blue-800"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
         >
           Go Back
         </button>
@@ -184,42 +181,37 @@ const EvaluationDetails = () => {
   ) as number[];
   const averageScore =
     scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length;
-
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 min-h-screen bg-white dark:bg-gray-900">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Speech Evaluation Details</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Speech Evaluation Details</h1>
         <button
           onClick={handleGoBack}
-          className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-gray-700"
+          className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded text-gray-700 dark:text-gray-300"
         >
           Go Back
         </button>
-      </div>
-
-      {/* Evaluation Summary Card */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      </div>      {/* Evaluation Summary Card */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-lg mb-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
               {isOwner ? "Your Speech" : `${evaluation.username}'s Speech`}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               {new Date(evaluation.date).toLocaleString()}
             </p>
           </div>
           <div className="text-right">
-            <div className="text-lg font-bold text-blue-600">
+            <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {averageScore.toFixed(1)}/10
             </div>
-            <div className="text-sm text-gray-500">Average Score</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Average Score</div>
           </div>
         </div>
-      </div>
-
-      {/* Scores Breakdown */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4">Performance Metrics</h3>
+      </div>      {/* Scores Breakdown */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-lg mb-8">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Performance Metrics</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {metricDefinitions.map((metric) => {
             const score =
@@ -237,38 +229,32 @@ const EvaluationDetails = () => {
             );
           })}
         </div>
-      </div>
-
-      {/* Transcript */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4">Transcript</h3>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <p className="whitespace-pre-wrap">{evaluation.transcript}</p>
+      </div>      {/* Transcript */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-lg mb-8">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Transcript</h3>
+        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+          <p className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">{evaluation.transcript}</p>
         </div>
-      </div>
-
-      {/* Feedback */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-semibold mb-4">AI Feedback</h3>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="prose prose-sm max-w-none">
-            <p className="whitespace-pre-wrap">{evaluation.feedback}</p>
+      </div>      {/* Feedback */}
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:shadow-lg mb-8">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">AI Feedback</h3>
+        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+          <div className="prose prose-sm max-w-none dark:prose-invert">
+            <p className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">{evaluation.feedback}</p>
           </div>
         </div>
-      </div>
-
-      {/* Action buttons for sharing or downloading */}
+      </div>      {/* Action buttons for sharing or downloading */}
       <div className="flex justify-end space-x-4">
         <button
           onClick={() => window.print()}
-          className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-gray-700"
+          className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded text-gray-700 dark:text-gray-300"
         >
           Print / Save as PDF
         </button>
         {isOwner && (
           <button
             onClick={() => navigate("/progresstracking")}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white"
+            className="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 px-4 py-2 rounded text-white"
           >
             View All Progress
           </button>
