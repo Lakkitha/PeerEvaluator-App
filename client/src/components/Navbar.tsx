@@ -617,10 +617,27 @@ const Navbar = () => {
                   >
                     Home
                   </Link>
-                </li>
-
+                </li>{" "}
                 {/* Show different menu items based on user role */}
-                {isClubAdmin ? (
+                {isWebAdmin ? (
+                  // Web admin menu items
+                  <li>
+                    <Link
+                      to="/webadmin/dashboard"
+                      className={`block py-2 px-3 text-center rounded md:p-0 ${
+                        isActive("/webadmin/dashboard")
+                          ? "text-white bg-blue-700 md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                          : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                      }`}
+                      aria-current={
+                        isActive("/webadmin/dashboard") ? "page" : undefined
+                      }
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  </li>
+                ) : isClubAdmin ? (
                   // Club coordinator menu items
                   <li>
                     <Link
@@ -759,7 +776,7 @@ const Navbar = () => {
                       </>
                     )}{" "}
                     {/* Show Dashboard link only for regular members */}
-                    {!isClubAdmin && (
+                    {!isClubAdmin && !isWebAdmin && (
                       <li>
                         <Link
                           to="/dashboard"
@@ -787,9 +804,9 @@ const Navbar = () => {
                       >
                         Profile
                       </Link>
-                    </li>
+                    </li>{" "}
                     {/* Club management options based on role */}
-                    {!isClubAdmin && userClub && (
+                    {!isClubAdmin && !isWebAdmin && userClub && (
                       <li>
                         <button
                           onClick={() => {
@@ -801,6 +818,17 @@ const Navbar = () => {
                           <span className="mr-2">✏️</span>
                           Request Club Change
                         </button>
+                      </li>
+                    )}
+                    {isWebAdmin && (
+                      <li>
+                        <Link
+                          to="/webadmin/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          Web Admin Dashboard
+                        </Link>
                       </li>
                     )}
                     {isClubAdmin && (
@@ -827,17 +855,6 @@ const Navbar = () => {
                           </button>
                         </li>
                       </>
-                    )}
-                    {isWebAdmin && (
-                      <li>
-                        <Link
-                          to="/webadmin/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                          onClick={() => setIsUserDropdownOpen(false)}
-                        >
-                          Web Admin
-                        </Link>
-                      </li>
                     )}
                     <li>
                       <button
