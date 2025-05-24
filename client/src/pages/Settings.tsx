@@ -114,22 +114,25 @@ const Settings = () => {
   };
   return (
     <div className="container mx-auto px-4 py-8 dark:bg-gray-900 min-h-screen">
-      <h1 className="text-3xl font-bold mb-8 dark:text-white">Account Settings</h1>
-
+      <h1 className="text-3xl font-bold mb-8 dark:text-white">
+        Account Settings
+      </h1>
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900/50 dark:border-red-600 dark:text-red-300">
           {error}
         </div>
       )}
-
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 dark:bg-green-900/50 dark:border-green-600 dark:text-green-300">
           {success}
         </div>
-      )}      <div className="grid md:grid-cols-2 gap-8">
+      )}{" "}
+      <div className="grid md:grid-cols-2 gap-8">
         {/* Email Update Section */}
         <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
-          <h2 className="text-xl font-bold mb-4 dark:text-white">Update Email</h2>
+          <h2 className="text-xl font-bold mb-4 dark:text-white">
+            Update Email
+          </h2>
           <form onSubmit={handleUpdateEmail}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
@@ -155,7 +158,9 @@ const Settings = () => {
 
         {/* Password Update Section */}
         <div className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-lg">
-          <h2 className="text-xl font-bold mb-4 dark:text-white">Change Password</h2>
+          <h2 className="text-xl font-bold mb-4 dark:text-white">
+            Change Password
+          </h2>
           <form onSubmit={handleUpdatePassword}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
@@ -202,9 +207,12 @@ const Settings = () => {
             </button>
           </form>
         </div>
-      </div>      {/* Account Deletion Section */}
+      </div>{" "}
+      {/* Account Deletion Section */}
       <div className="bg-white p-6 rounded-lg shadow-md mt-8 dark:bg-gray-800 dark:shadow-lg">
-        <h2 className="text-xl font-bold mb-4 dark:text-white">Delete Account</h2>
+        <h2 className="text-xl font-bold mb-4 dark:text-white">
+          Delete Account
+        </h2>
         <div className="bg-red-50 border border-red-300 p-4 rounded-md mb-4 dark:bg-red-900/20 dark:border-red-700">
           <p className="text-red-800 mb-2 dark:text-red-300 font-medium">
             Warning: This action cannot be undone. All your data will be
